@@ -1,6 +1,6 @@
 from deap import base, creator, tools
 from utils.EAG_Classifier_Library import PCA_Constructor
-from utils.EAG_SIngleChannel_DataProcessing_Library import butter_bandpass_filter
+from utils.EAG_DataProcessing_Library import butter_bandpass_filter
 import random
 import pandas as pd
 from itertools import combinations

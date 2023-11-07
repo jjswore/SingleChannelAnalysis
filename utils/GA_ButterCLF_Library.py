@@ -2,7 +2,7 @@ from sklearn.model_selection import cross_val_score
 import concurrent.futures
 from deap import base, creator, tools
 from utils.EAG_Classifier_Library import *
-from utils.EAG_SIngleChannel_DataProcessing_Library import *
+from utils.EAG_DataProcessing_Library import *
 
 # Set up the problem
 

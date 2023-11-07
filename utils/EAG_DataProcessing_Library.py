@@ -163,22 +163,36 @@ def findNORM(file1, folder):
     #used the find the control file.
     result = 1000000000
     ctrl = None
-    concentration = os.path.basename(file1).split('_')[1].lower()
-    date = os.path.basename(file1).split('_')[0]
-    print(f'concentration of file is: {concentration.lower()}')
-    print(f'date of file is: {date}')
-    pfiles = [x.lower() for x in folder if concentration.lower() in os.path.basename(x.lower())]
-    print(pfiles)
-    pfiles2 = [x for x in pfiles if date.lower() in os.path.basename(x.lower())]
-    print(pfiles2)
-    for x in pfiles2:
-        #get the time difference between experiment and the control. repeat for all files in folder
-        tt = abs(os.path.getmtime(file1) - os.path.getmtime(x))
-        if tt < result:
-            #if the difference is smaller than the result variable then replace "result" with new dif
-            result = tt
-            ctrl = x
-            # print(ctrl)
+    if 'mineraloil' not in os.path.basename(file1):
+        concentration = os.path.basename(file1).split('_')[1].lower()
+        date = os.path.basename(file1).split('_')[0]
+        print(f'concentration of file is: {concentration.lower()}')
+        print(f'date of file is: {date}')
+        pfiles = [x.lower() for x in folder if concentration.lower() in os.path.basename(x.lower())]
+        print(pfiles)
+        pfiles2 = [x for x in pfiles if date.lower() in os.path.basename(x.lower())]
+        print(pfiles2)
+        for x in pfiles2:
+            #get the time difference between experiment and the control. repeat for all files in folder
+            tt = abs(os.path.getmtime(file1) - os.path.getmtime(x))
+            if tt < result:
+                #if the difference is smaller than the result variable then replace "result" with new dif
+                result = tt
+                ctrl = x
+    else:
+        date = os.path.basename(file1).split('_')[0]
+        print(f'date of file is: {date}')
+        print('file is a mineral oil experiment')
+        pfiles2 = [x for x in folder if date.lower() in os.path.basename(x.lower())]
+        print(pfiles2)
+        for x in pfiles2:
+            # get the time difference between experiment and the control. repeat for all files in folder
+            tt = abs(os.path.getmtime(file1) - os.path.getmtime(x))
+            if tt < result:
+                # if the difference is smaller than the result variable then replace "result" with new dif
+                result = tt
+                ctrl = x
+
     return ctrl
 
 
@@ -385,7 +399,9 @@ def process_data(DIR, savedir=None,  Norm='YY', Smoothen=False, LOG=False, Butte
     ctrl = [x for x in f1 if 'mineraloil' in os.path.basename(x) or 'Mineral_Oil' in os.path.basename(x)]#if 'BagNoOdor' in os.path.basename(x)
     print(f'these are the experiments {len(ctrl)}')
     exp = [x for x in f1 if 'mineraloil' not in os.path.basename(x) and 'Mineral_Oil' not in os.path.basename(x) and '_300_' not in os.path.basename(x) and '_3k_' not in os.path.basename(x)]
-
+    #exp = [x for x in f1 if '_300_' not in os.path.basename(x) and '_3k_' not in os.path.basename(x)]
+    #exp = [x for x in f1]
+    #exp = [x for x in f1 if 'mineraloil' in os.path.basename(x) or 'Mineral_Oil' in os.path.basename(x)]
     #print(f'these are the experiments {exp}')
     YY = [x for x in f1 if 'ylangylang' in os.path.basename(x) or 'YlangYlang' in os.path.basename(x)]
     # Do we want to Normalize the data?
@@ -394,29 +410,39 @@ def process_data(DIR, savedir=None,  Norm='YY', Smoothen=False, LOG=False, Butte
     for e in exp:
         data = e
         control = findCTRL(data, ctrl)
+        ctrlctrl = findCTRL(control, ctrl)
         MINIM = findNORM(data, YY)
+        if 'mineraloil' in os.path.basename(control):
+            concentration = os.path.basename(MINIM).split('_')[1]
+            print(concentration)
+            CDATE, CVOC, CTRIAL = os.path.basename(control).split('_')
+            ctrl_name = f'{CDATE}_{concentration}_{CVOC}_{CTRIAL}'
         # print(data,control)
+
         n = os.path.basename(data)
-        c_name = os.path.basename(control)
+        print(f'name is {n}')
+        #c_name = os.path.basename(control)
 
         print(n, 'is an experiment')
         VOC = n.split("_")[2]
-        C_VOC = c_name.split("_")[1]
 
         DIR = SAVEDIR + VOC + '/'
-        CDIR = SAVEDIR + C_VOC + '/'
-        n = namer(data)
-        c_name = namer(control)
+        CDIR = SAVEDIR + CVOC + '/'
+
+        name = namer(n)
+        c_name = namer(ctrl_name)
+
         print(f'data:{data}, control:{control}, normalizer:{MINIM}')
         Odor = Extract_mEAG(data, Butter[0], Butter[1],Butter[2], BF=B_filt)
         CTRL = Extract_mEAG(control, Butter[0], Butter[1],Butter[2], BF=B_filt)
+        CTRL_CTRL = Extract_mEAG(ctrlctrl, Butter[0], Butter[1],Butter[2], BF=B_filt)
         MIN = Extract_mEAG(MINIM, Butter[0], Butter[1],Butter[2], BF=B_filt)
         print(Odor)
-        #for x in range(0, 3):
+        for x in range(0, 3):
             # subtract the control
-            #Odor[x] = Odor[x] - CTRL[x]#.mean(axis=0))
-            #CTRL[x] = CTRL[x] - CTRL[x]#.mean(axis=0))
-            #MIN[x] = MIN[x] - CTRL[x]#.mean(axis=0))
+            Odor[x] = Odor[x] - CTRL[x].mean(axis=0)
+            CTRL[x] = CTRL[x] - CTRL_CTRL[x].mean(axis=0)
+            MIN[x] = MIN[x] - CTRL[x].mean(axis=0)
             # subtract channel 1 from channel 2
 
         MIN1 = find_MaxIntenseWave(MIN)
@@ -455,8 +481,9 @@ def process_data(DIR, savedir=None,  Norm='YY', Smoothen=False, LOG=False, Butte
             Odor[x][:] = log_transform(Odor[x][:])
 
         if RETURN == 'SAVE':
-                SaveEAG(Odor, directory=DIR, name=n)
-                #print((f'saveing control: {CTRL}'))
+                print(f'saving {n}')
+                SaveEAG(Odor, directory=DIR, name=name)
+                print((f'saveing control: {CTRL}'))
                 SaveEAG(CTRL, directory=CDIR, name=c_name)
 
         elif RETURN == 'PLOT':

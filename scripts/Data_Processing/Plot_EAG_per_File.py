@@ -1,5 +1,5 @@
 import os
-from utils.EAG_SIngleChannel_DataProcessing_Library import csv_plot
+from utils.EAG_DataProcessing_Library import csv_plot
 # Path to the parent directory
 parent_directory = '/Users/joshswore/analysis_python_code/EAG_and_VOC_Project/Single_Channel_Analysis/' \
                    'Data/NoControlSubtraction/Normalized/NoFilt/'

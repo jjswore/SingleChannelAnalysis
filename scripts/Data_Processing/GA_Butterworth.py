@@ -1,5 +1,6 @@
 from utils.GA_Butter_Library import *
 from utils.EAG_Classifier_Library import TT_Split
+from utils.SubSample_Control import Reduce_Ctrl_Samples
 import time
 import os
 from EAG_PCA import EAG_PCA
@@ -9,19 +10,21 @@ from Plot_PCA import Plot_PCA
 print('beginning Optimization')
 start = time.time()
 
-data='/Users/joshswore/analysis_python_code/EAG_and_VOC_Project/Single_Channel_Analysis/Data/' \
-     '/Normalized/NoFilt/Dataframes/QualityControlled/_QC_T_1.csv'
-odors = 'mineraloil|benzaldehyde|roseoil'
-Odenote = 'RoBhydeMin'
+data='/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Data/ControlSubtracted2/Normalized/NoFilt/' \
+     'Dataframes/QualityControlled/_QC_T_1.csv'
+odors = 'mineraloil|limonene'
+OdeAbrev = 'LimMin_subsamp'
 concentration = '1k'
-SaveDir=f'/Users/joshswore/analysis_python_code/EAG_and_VOC_Project/Single_Channel_Analysis/' \
-        f'Results/ControlSubtracted/'
+SaveDir=f'/Users/joshswore/PycharmProjects/SingleChannelAnalysis/' \
+        f'Results/ControlSubtracted2/{OdeAbrev}/'
 
 print('checking if Save Directory exists')
 if not os.path.exists(SaveDir):
     os.makedirs(SaveDir)
 
-data_df = pd.read_csv(data, index_col=0)
+df = pd.read_csv(data, index_col=0)
+
+data_df = Reduce_Ctrl_Samples(DF=df)
 
 DF=data_df[data_df['concentration'].str.contains(concentration)]
 DF=DF[DF['label'].str.contains(odors)]
@@ -30,8 +33,8 @@ print(DF['label'].unique())
 train_features, test_features, train_labels, test_labels =TT_Split(DF, .5)
 Training_data = pd.concat([train_features, train_labels], axis=1)
 Test_data = pd.concat([test_features, test_labels], axis=1)
-Training_data.to_csv(f'{SaveDir}{Odenote}_trainingDF.csv')
-Test_data.to_csv(f'{SaveDir}{Odenote}_testingDF.csv')
+Training_data.to_csv(f'{SaveDir}{OdeAbrev}_trainingDF.csv')
+Test_data.to_csv(f'{SaveDir}{OdeAbrev}_testingDF.csv')
 # Get the indices of the train_features DataFrame
 train_indices = train_features.index
 # Select the corresponding rows from the LLL_df
@@ -57,12 +60,12 @@ BDF = pd.concat([buttered_df, DF.iloc[:,-3:]], axis=1)
 PDF = pd.DataFrame.from_dict(params, orient='index').T
 
 
-PDF.to_csv(f'{SaveDir}/{Odenote}_BestParams.csv')
-BDF.to_csv(f'{SaveDir}{Odenote}_finalDF.csv')
-STATSDF.to_csv(f'{SaveDir}{Odenote}_STATS.csv')
+PDF.to_csv(f'{SaveDir}/{OdeAbrev}_BestParams.csv')
+BDF.to_csv(f'{SaveDir}/{OdeAbrev}_finalDF.csv')
+STATSDF.to_csv(f'{SaveDir}{OdeAbrev}_STATS.csv')
 print('Computing PC')
-EAG_PCA(BDF,SaveDir,concentration,odors, Odenote)
-Plot_PCA(DATADIR=f'{SaveDir}/PCA/',ODENOTE=Odenote,CONC=concentration,ODORS=odors,TITLE='')
+EAG_PCA(BDF,SaveDir,concentration,odors, OdeAbrev)
+Plot_PCA(DATADIR=f'{SaveDir}/PCA/',ODENOTE=OdeAbrev,CONC=concentration,ODORS=odors,TITLE='')
 print('the entire code has finished')
 
 ## from here I need to decide how I will proceed... Do I reprocess my data? no I think I return the best
