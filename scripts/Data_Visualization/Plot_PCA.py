@@ -89,7 +89,7 @@ def Plot_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE):
                     , PCA_DF.loc[indicesToKeep, 'PC 2'], c=[color], edgecolors='black', s=60, label=target)
         plotted_labels.append(target)
 
-    plt.legend(plotted_labels)
+    plt.legend(plotted_labels, fontsize=20)
 
     plt.savefig(f'{SaveDir}{Odenotation}_PCA.jpg')
     plt.savefig(f'{SaveDir}{Odenotation}_PCA.svg')
@@ -102,8 +102,8 @@ Odenote = 'LimMin'
 concentration = '1k'
 SaveDir='/Users/joshswore/analysis_python_code/EAG_and_VOC_Project/Single_Channel_Analysis/Data/Normalized/NoFilt/' \
         'GA_Butter_Optimized_FDR/LimMin/PCA/'
-Plot_PCA(DATADIR=data,ODENOTE=Odenote,CONC=concentration,ODORS=odors,TITLE=f'Lim, Mineraloil \n Concentration 1:1000')
-'''
+Plot_PCA(DATADIR=data,ODENOTE=Odenote,CONC=concentration,ODORS=odors,TITLE=f'Lim, Mineraloil \n Concentration 1:1000')'''
+
 ###########################################################################################################
 #set the data to be loaded and set a save location
 """data='/Users/joshswore/Manduca/Single_Channel_Analysis/DataFrames/Normalized/GA_Butter_Optimized/FDR_Fitness/LLL_finalDF.csv'

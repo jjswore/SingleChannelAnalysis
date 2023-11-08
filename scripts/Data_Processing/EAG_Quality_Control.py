@@ -2,9 +2,9 @@ import pandas as pd
 
 from utils.EAG_DataProcessing_Library import *
 
-data = '/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Data/ControlSubtracted2/' \
+data = '/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Data/ControlSubtracted/' \
        'Normalized/NoFilt/Dataframes/NoQC/All_Odors.csv'
-SaveDir = '/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Data/ControlSubtracted2/' \
+SaveDir = '/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Data/ControlSubtracted/' \
           'Normalized/NoFilt/Dataframes/QualityControlled/'
 
 if not os.path.exists(SaveDir):

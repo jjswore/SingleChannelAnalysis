@@ -200,7 +200,7 @@ def SVM_GridSearch(data, concentration, odors):
 
     # Set hyperparameters to search over
     kernel = ['rbf']
-    C = [1, 2, 2, 5, 3, 4, 5, 7, 7.5, 8]
+    C = [1,  2, 5, 3, 4, 5, 7, 7.5, 8, 9, 10, 12.5, 15, 17.5, 20]
     degree = [0, 0.01, 0.05, 0.1, 0.5]
     gamma = ['scale', 'auto', 0.1, 0.2, 0.5]
     coef0 = [0, 0.05, 0.1, 0.2]
@@ -319,7 +319,7 @@ def LogR_GridSearch(data, concentration, odors):
     #create an itereable for cross validation in hyperparameter tuning...
     #folds[[x for TT_Split(train_features, .7) in range(5)]]
 
-    C = [.1, 1, 2, 2, 5, 3, 4, 5, 7, 7.5, 8, 9, 10]
+    C = [ 1, 2, 2, 5, 3, 4, 5, 7, 7.5, 8, 9, 10, 12.5 ,15, 20, 30]
     fit_intercept = [True, False]
     solver = ['liblinear']
     penalty = ['l2']
