@@ -8,8 +8,8 @@ from scripts.Data_Visualization.Plot_PCA import Plot_PCA
 #==========================================================================================
 #Run the GA
 
-ODORS_L = ['mineraloil|lemonoil|limonene']
-ODEABEV_L = ['LemLinMin-1k100', ]
+ODORS_L = ['mineraloil|benzaldehyde|benzylalcohol']
+ODEABEV_L = ['BolBhydeMin']
 #DILUTIONS =['1k','1k','1k']
 
 for o, ob in zip(ODORS_L, ODEABEV_L):
@@ -22,9 +22,9 @@ for o, ob in zip(ODORS_L, ODEABEV_L):
          'Dataframes/QualityControlled/_QC_T_1.csv'
     odors = o#'mineraloil|limonene|lemonoil'
     OdeAbrev = ob #'LimLoMin'
-    concentration = '1k|100'
+    concentration = '1k'
     SaveDir=f'/Users/joshswore/PycharmProjects/SingleChannelAnalysis/' \
-            f'Results/ControlSubtracted/{OdeAbrev}/Butterworth_Optimized_Filter'
+            f'Results/ControlSubtracted/{OdeAbrev}/'
 
     print('checking if Save Directory exists')
     if not os.path.exists(SaveDir):
@@ -68,11 +68,14 @@ for o, ob in zip(ODORS_L, ODEABEV_L):
     PDF = pd.DataFrame.from_dict(params, orient='index').T
 
 
-    PDF.to_csv(f'{SaveDir}/{OdeAbrev}_BestParams.csv')
-    BDF.to_csv(f'{SaveDir}/{OdeAbrev}_finalDF.csv')
-    STATSDF.to_csv(f'{SaveDir}{OdeAbrev}_STATS.csv')
+    PDF.to_csv(f'{SaveDir}/Butterworth_Optimized_Filter/'
+               f'{OdeAbrev}_BestParams.csv')
+    BDF.to_csv(f'{SaveDir}/Butterworth_Optimized_Filter/'
+               f'{OdeAbrev}_finalDF.csv')
+    STATSDF.to_csv(f'{SaveDir}Butterworth_Optimized_Filter/'
+                   f'{OdeAbrev}_STATS.csv')
     print('Computing PC')
-    EAG_PCA(BDF,SaveDir,concentration,odors, OdeAbrev)
+    EAG_PCA(BDF,f'{SaveDir}',concentration,odors, OdeAbrev)
     Plot_PCA(DATADIR=f'{SaveDir}/PCA/',ODENOTE=OdeAbrev,CONC=concentration,ODORS=odors,TITLE='')
     print('the entire code has finished')
 

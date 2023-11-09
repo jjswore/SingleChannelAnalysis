@@ -94,7 +94,7 @@ def RFC_GridSearch(data, concentration, odors):
 
     #acc_scorer = make_scorer(accuracy_score)
     print("beginning grid search")
-    GRID_cv = HalvingGridSearchCV(RandomForestClassifier(),  param_grid, scoring='accuracy', cv=5, n_jobs=7, min_resources=14, error_score='raise', verbose=10)
+    GRID_cv = HalvingGridSearchCV(RandomForestClassifier(),  param_grid, scoring='accuracy', cv=5, n_jobs=7, min_resources=14, error_score='raise', verbose=1)
     GRID_cv.fit(train_features, train_labels)
     gbp=GRID_cv.best_params_
     gbs=GRID_cv.best_score_
@@ -200,7 +200,7 @@ def SVM_GridSearch(data, concentration, odors):
 
     # Set hyperparameters to search over
     kernel = ['rbf']
-    C = [1,  2, 5, 3, 4, 5, 7, 7.5, 8, 9, 10, 12.5, 15, 17.5, 20]
+    C = [1, 4, 5, 7, 7.5, 8, 9, 10, 12.5, 15, 17.5, 20, 22.5, 25]
     degree = [0, 0.01, 0.05, 0.1, 0.5]
     gamma = ['scale', 'auto', 0.1, 0.2, 0.5]
     coef0 = [0, 0.05, 0.1, 0.2]

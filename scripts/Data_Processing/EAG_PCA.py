@@ -10,7 +10,7 @@ def EAG_PCA(DATA, SAVEDIR, CONC, ODORS, OD):
     odors = ODORS
     odenote = OD
     data = DATA
-    SaveDir = f'{SAVEDIR}PCA/'
+    SaveDir = f'{SAVEDIR}/PCA/'
 
     if not os.path.exists(SaveDir):
         os.makedirs(SaveDir)
@@ -59,7 +59,7 @@ def EAG_PCA(DATA, SAVEDIR, CONC, ODORS, OD):
 
     All_DF_PCA_DF = pd.concat([All_DF_PCA_DF,All_DF.iloc[:,-3:]], axis=1 )
     print(All_DF_PCA_DF.columns)
-    All_DF_PCA_DF.to_csv(f'{SaveDir}{odenote}_PCA.csv')
+    All_DF_PCA_DF.to_csv(f'{SaveDir}/{odenote}_PCA.csv')
     return All_DF_PCA_DF, PCA_set
 
 #=========================================================================================================
