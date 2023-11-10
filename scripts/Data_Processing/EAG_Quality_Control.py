@@ -3,9 +3,9 @@ import pandas as pd
 from utils.EAG_DataProcessing_Library import *
 
 data = '/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Data/ControlSubtracted/' \
-       'Normalized/NoFilt/Dataframes/NoQC/All_Odors.csv'
+       'Normalized/BF.1_2_/Dataframes/NoQC/All_Odors.csv'
 SaveDir = '/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Data/ControlSubtracted/' \
-          'Normalized/NoFilt/Dataframes/QualityControlled/'
+          'Normalized/BF.1_2_/Dataframes/QualityControlled/'
 
 if not os.path.exists(SaveDir):
     print('making directory...')

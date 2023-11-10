@@ -1,9 +1,8 @@
-import os
 import pandas as pd
-import glob
-import csv
-import os
 from matplotlib import pyplot as plt
+import numpy as np
+from matplotlib.ticker import FixedLocator, FixedFormatter, FuncFormatter
+
 def Plot_All_EAGs(df):
     print('building df')
     fig, axes = plt.subplots(nrows=8, ncols=3, sharey=True,figsize=(28, 28))
@@ -33,51 +32,165 @@ def Plot_All_EAGs(df):
 
 #'/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Results/'
 #                     'ControlSubtracted/LimMin/Butterworth_Optimized_Filter/LimMin_finalDF.csv'
-def Find_Prospective_Waves(CSV, Odor):
+def Find_Prospective_Waves(CSV, Odor, Conc):
     DF = pd.read_csv(CSV, index_col=0)
     for file in DF.index:
         if Odor in file:
-            DF.T[file][:-3].plot()
-            plt.title(file)
-            #plt.ylim()
-            plt.show()
+            if Conc in file:
+                DF.T[file][:-3].plot()
+                plt.title(file)
+                #plt.ylim()
+                plt.xlim(0, 6000)
+                plt.ylim(-.5,.25)
+                plt.show()
+                print(file)
+                ans = input('does the file look good?')
+                if ans.lower() != 'yes':
+                    continue
+                else:
+                    break
+def EAG_All_Concentrations_Plot(file, waves):
+    file ='/Users/joshswore/PycharmProjects/SingleChannelAnalysis/' \
+          'Data/ControlSubtracted/Normalized/BF.1_2_/' \
+          'Dataframes/QualityControlled/_QC_T_1.csv'
 
-file ='/Users/joshswore/PycharmProjects/' \
-      'SingleChannelAnalysis/Results/' \
-    'ControlSubtracted/LimLoMin/' \
-    'Butterworth_Optimized_Filter/LimLoMin_finalDF.csv'
+    #Find_Prospective_Waves(file, 'lemonoil', '100')
 
-Find_Prospective_Waves(file, 'limonene')
-    #'082922m3a11klimonene0001wave2'
-    #'082922m3a11klimonene0000wave2'
 
-    #'080522m1a11kmineraloil0005wave0'
-'''DF = pd.read_csv('/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Results/'
-                'ControlSubtracted/LimMin/Butterworth_Optimized_Filter/LimMin_finalDF.csv',
-                 index_col=0).T
 
-Limonene = DF['082922m3a11klimonene0001wave2'][:-3]
-MineralOil = DF['080522m1a11kmineraloil0005wave0'][:-3]
+    DF = pd.read_csv(file,
+                     index_col=0).T
+    DF=DF.iloc[:,:-3]
+    #DF.index = DF.index.astype(float) / 1000
+
+    #10k
+    Limonene10k = DF['090122m2a110klimonene0000wave1'][:-3]
+    LemonOil10k = DF['082322m1a110klemonoil0001wave0'][:-3]
+    MineralOil10k = DF['072822m1a110kmineraloil0008wave0'][:-3]
+
+    #1k
+    Limonene1k = DF['080422m1a11klimonene0001wave0'][:-3]
+    LemonOil1k = DF['082222m2a11klemonoil0000wave1'][:-3]
+    MineralOil1k = DF['080522m1a11kmineraloil0005wave0'][:-3]
+
+    #100
+    Limonene100 = DF['082222m2a1100limonene0000wave1'][:-3]
+    LemonOil100 = DF['082222m1a1100lemonoil0001wave1'][:-3]
+    MineralOil100 = DF['080422m1a1100mineraloil0004wave2'][:-3]
+
+
+    colors = plt.cm.Paired(np.linspace(0, 1, 8))
+
+    label_color_dict = {
+            'limonene': [colors[0], 'o'],
+            'lemonoil': [colors[1], 'o'],
+            'ylangylang':[ colors[2], 'o'],
+            'roseoil': [colors[3], 's'],
+            'benzylalcohol': [colors[4],'s'],
+            '1octen3ol': [colors[5], '^'],
+            'benzaldehyde': [colors[6], 'o'],
+            'linalool': [colors[7], '^'],
+            'mineraloil': ['grey', 'P'],}
+
+    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(30, 10), sharey=True)
+    fig.subplots_adjust(wspace=0)
+    fig.text(0.5, 0.04, 'Time (s)', ha='center', va='center', fontsize=20)
+    fig.set_facecolor('white')
+
+    for i in range(3):
+        ax[i].set_facecolor('white')
+        ax[i].spines['top'].set_visible(False)
+        ax[i].spines['right'].set_visible(False)
+        if i > 0:  # Only for the second and third subplots
+            # Hide the tick labels for y-axis instead of removing the ticks
+            for label in ax[i].get_yticklabels():
+                label.set_visible(False)
+            ax[i].spines['left'].set_visible(False)
+            ax[i].tick_params(axis='y', colors='none')
+
+    ax[0].set_ylabel('Normalized Response', fontsize=25)
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
+    ax[0].set_ylim(-.4,.4)
+
+    Limonene10k.plot(ax=ax[0], color = label_color_dict.get('limonene')[0])
+    LemonOil10k.plot(ax=ax[0], color= label_color_dict.get('lemonoil')[0])
+    MineralOil10k.plot(ax=ax[0], color= label_color_dict.get('mineraloil')[0])
+
+    Limonene1k.plot(ax=ax[1], color = label_color_dict.get('limonene')[0])
+    LemonOil1k.plot(ax=ax[1], color= label_color_dict.get('lemonoil')[0])
+    MineralOil1k.plot(ax=ax[1], color= label_color_dict.get('mineraloil')[0])
+
+    Limonene100.plot(ax=ax[2], color = label_color_dict.get('limonene')[0])
+    LemonOil100.plot(ax=ax[2], color = label_color_dict.get('lemonoil')[0])
+    MineralOil100.plot(ax=ax[2], color = label_color_dict.get('mineraloil')[0])
+
+    #plt.savefig('/Users/joshswore/PycharmProjects/'
+    #            'SingleChannelAnalysis/EAG_WAVE_Plots/LimLoMin1k.svg')
+    plt.show()
+
+
+#def EAG_1_Conc_Plot(file, waves):
+
+file ='/Users/joshswore/PycharmProjects/SingleChannelAnalysis/' \
+          'Data/ControlSubtracted/Normalized/BF.1_2_/' \
+          'Dataframes/QualityControlled/_QC_T_1.csv'
+
+EAGS =['080422m1a11klimonene0001wave0',
+       '082222m2a11klemonoil0000wave1',
+       '080522m1a11kmineraloil0005wave0']
+
+DF = pd.read_csv(file, index_col=0).T
+
+# Find_Prospective_Waves(file, 'lemonoil', '100')
+
+DF = DF.iloc[:-3, :]
+DF.index = pd.to_numeric(DF.index)
+DF.index = DF.index.astype(float) / 1000
+#print(type(DF.index[0]))
+
+# 1k
+Limonene1k = DF[EAGS[0]]
+LemonOil1k = DF[EAGS[1]]
+MineralOil1k = DF[EAGS[2]] - DF[EAGS[2]]
+
+colors = plt.cm.Paired(np.linspace(0, 1, 8))
+
+label_color_dict = {
+    'limonene': [colors[0], 'o'],
+    'lemonoil': [colors[1], 'o'],
+    'ylangylang': [colors[2], 'o'],
+    'roseoil': [colors[3], 's'],
+    'benzylalcohol': [colors[4], 's'],
+    '1octen3ol': [colors[5], '^'],
+    'benzaldehyde': [colors[6], 'o'],
+    'linalool': [colors[7], '^'],
+    'mineraloil': ['grey', 'P'], }
 
 fig, ax = plt.subplots(figsize=(10, 10))
+fig.set_facecolor('white')
 
-fig.set_facecolor('lightgrey')
-ax.set_facecolor('lightgrey')
-#ax.set_alpha(0.25)
+ax.set_facecolor('white')
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
 
-plt.xticks(fontsize=12)
+ax.set_ylabel('Normalized Response', fontsize=25)
+ax.set_xlabel('Time (s)', fontsize=25)
+ax.set_ylim(-.4, .4)
+plt.xticks(fontsize=14)
 plt.yticks(fontsize=14)
-plt.xlabel('Time', fontsize=25)
-plt.ylabel('Normalized Response', fontsize=25)
-#plt.title(TITLE, fontsize=25)
-plt.gca().spines['top'].set_visible(False)
-plt.gca().spines['right'].set_visible(False)
-ax.set_ylim(-.5,.25)
+plotted_labels = ['Limonene', 'Lemon Oil', 'Mineral Oil (Ctrl)']
 
-Limonene.plot(color='limegreen')
-MineralOil.plot(color='black')
 
+Limonene1k.plot(color=label_color_dict.get('limonene')[0], linewidth=3)
+LemonOil1k.plot(color=label_color_dict.get('lemonoil')[0], linewidth=3)
+MineralOil1k.plot(color=label_color_dict.get('mineraloil')[0], linewidth=3)
+
+ax.legend(plotted_labels, markerscale=1.5, fontsize=20, frameon=False)
 plt.savefig('/Users/joshswore/PycharmProjects/'
-            'SingleChannelAnalysis/EAG_WAVE_Plots/LimMin.svg')
-plt.show()'''
+            'SingleChannelAnalysis/EAG_WAVE_Plots/LimLoMin1k.svg')
+plt.show()
 
+
+
+#EAG_1_Conc_Plot(file, EAGS)

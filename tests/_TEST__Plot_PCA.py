@@ -1,14 +1,87 @@
 import pandas as pd
+from sklearn.neighbors import KernelDensity
 import os
 import pickle
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 from matplotlib import transforms
+from scipy.stats import gaussian_kde
 import numpy as np
 from sklearn.decomposition import PCA
 
+def plot_filled_contour(ax, data, n_std, label, color):
+    """
+    Add a filled contour area to a 2D plot representing the area occupied by the points of a class.
+
+    Parameters:
+    - ax: A matplotlib axes object
+    - data: DataFrame with the data
+    - n_std: Number of standard deviations to determine the extent of the area
+    - label: The label for the dataset
+    - color: Color of the filled contour
+    """
+    # Create a Gaussian KDE for the data
+    #data = data.to_numpy()
+    kde = gaussian_kde(data.T)
+
+    # Create a grid over which we can evaluate kde
+    x_min, x_max = data.iloc[:, 0].min(), data.iloc[:, 0].max()
+    y_min, y_max = data.iloc[:, 1].min(), data.iloc[:, 1].max()
+    xx, yy = np.mgrid[x_min:x_max:100j, y_min:y_max:100j]
+
+    # Evaluate kde on the grid
+    zz = kde(np.vstack([xx.flatten(), yy.flatten()]))
+
+    # Plot the filled contour
+    ax.contourf(xx, yy, zz.reshape(xx.shape), levels=[zz.min() + (zz.max()-zz.min()) * 0.01, zz.max()], colors=[color], alpha=0.5)
+
+    # Plot the contour line
+    ax.contour(xx, yy, zz.reshape(xx.shape), levels=[zz.min() + (zz.max()-zz.min()) * 0.01], colors=[color], linewidths=2)
+def plot_kde_sklearn(ax, data, label, color):
+    data = data.to_numpy()
+    # Instantiate and fit the KDE model
+    kde = KernelDensity(bandwidth=15000.0, leaf_size=1, kernel='gaussian')
+    kde.fit(data)
+
+    # Create a grid over which we will evaluate the KDE
+    x_min, x_max = data[:, 0].min() - 1, data[:, 0].max() + 1
+    y_min, y_max = data[:, 1].min() - 1, data[:, 1].max() + 1
+    x_grid, y_grid = np.meshgrid(np.linspace(x_min, x_max, 100), np.linspace(y_min, y_max, 100))
+
+    # Evaluate the KDE on the grid
+    grid_samples = np.vstack([x_grid.ravel(), y_grid.ravel()]).T
+    log_density_values = kde.score_samples(grid_samples)
+    density_values = np.exp(log_density_values).reshape(x_grid.shape)
+
+    # Plot the KDE as contours, using the provided color
+    ax.contour(x_grid, y_grid, density_values, levels=10, colors=[color], alpha=0.5)
+    ax.contourf(x_grid, y_grid, density_values, levels=10, colors=[color], alpha=0.3)
+
+    # Plot the original data points on top of the KDE plot
+    #ax.scatter(data[:, 0], data[:, 1], s=50, color=color, label=label, edgecolors='k')
+
+
+def add_std_dev_shading(ax, data, label, color):
+    data = data.to_numpy()
+    # Calculate the mean and standard deviation for the PCA components
+    mean_x = np.mean(data[:, 0])
+    std_x = np.std(data[:, 0])
+    mean_y = np.mean(data[:, 1])
+    std_y = np.std(data[:, 1])
+
+    # Create a grid of x values
+    x = np.linspace(mean_x - 3 * std_x, mean_x + 3 * std_x, 100)
+
+    # Calculate the y values for the upper and lower bounds of the shaded area
+    y_lower = mean_y - std_y
+    y_upper = mean_y + std_y
+
+    # Plot the shaded area
+    ax.fill_between(x, y_lower, y_upper, color=color, alpha=0.2, label=f'{label} ±1 std dev')
+
 
 def draw_confidence_ellipse(ax, data, n_std, label, color, marker):
+    data = data.to_numpy()
     cov = np.cov(data, rowvar=False)
     pearson = cov[0, 1] / np.sqrt(cov[0, 0] * cov[1, 1])
     # Using a special case to obtain the eigenvalues of this two-dimensionl dataset.
@@ -37,7 +110,7 @@ def draw_confidence_ellipse(ax, data, n_std, label, color, marker):
     ax.scatter(data[:, 0], data[:, 1], color=color, marker=marker, edgecolors='black', s=60, label=label)
 
 
-def Plot_PCA_ExplainedVariance(DATADIR, ODENOTE, ODORS, CONC, TITLE):
+def Plot_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE):
     # set the data to be loaded and set a save location
     Odenotation = ODENOTE
     Concentration = CONC
@@ -83,24 +156,6 @@ def Plot_PCA_ExplainedVariance(DATADIR, ODENOTE, ODORS, CONC, TITLE):
 
     # Plot Results
     # ============================================================================================
-def Plot_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE):
-    Odenotation = ODENOTE
-    Concentration = CONC
-    TITLE = TITLE
-    DIR = f'{DATADIR}'
-
-    PCA_df = f'{DIR}/{Odenotation}_PCA.csv'
-    SaveDir = f'{DIR}/'
-
-    # make sure the folder for saving exists
-    if not os.path.exists(SaveDir):
-        os.makedirs(SaveDir)
-
-    # open the PCA_DF into a dataframe
-    data_df = pd.read_csv(PCA_df, index_col=0)
-    DF = data_df[data_df['concentration'].str.contains(CONC)]
-    PCA_DF = DF[DF['label'].str.contains(ODORS)]
-    print(PCA_DF['label'])
 
     plt.figure()
     plt.figure(figsize=(10, 10))
@@ -130,7 +185,7 @@ def Plot_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE):
     }
 
     Targets = list(PCA_DF['label'].unique())
-    n_std = 2  # for 95% confidence interval
+    #n_std = 2  # for 95% confidence interval
 
     plotted_labels = []  # List to keep track of labels we have plotted
 
@@ -139,20 +194,24 @@ def Plot_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE):
         indicesToKeep = PCA_DF['label'] == target
         print(f'indicesToKeep {indicesToKeep}')
         subset = PCA_DF.loc[indicesToKeep, ['PC 1', 'PC 2']]
-        plt.scatter(subset.loc[indicesToKeep, 'PC 1']
-                    , subset.loc[indicesToKeep, 'PC 2'], color=color[0], marker=color[1], edgecolors='black', s=60,
-                    label=target)
-        print(f'subset is {subset}')
 
+        print(f'subset is {subset}')
+        plt.scatter(subset.loc[indicesToKeep, 'PC 1']
+                    , subset.loc[indicesToKeep, 'PC 2'], color=color, marker=marker, edgecolors='black', s=60,
+                    label=target)
+        #plot_filled_contour(plt.gca(), subset, n_std, target, label_color_dict[target][0])
+        #plot_kde_sklearn(plt.gca(), subset, target, color)
+        #add_std_dev_shading(plt.gca(), subset, target, color)
+        #draw_confidence_ellipse(plt.gca(), subset, n_std, target, color, marker)
         plotted_labels.append(target)
 
-        for i in subset.index:
+        '''for i in subset.index:
             plt.annotate(subset.loc[i, 'date'],  # This is the text to use for the annotation
                          (subset.loc[i, 'PC 1'], subset.loc[i, 'PC 2']),  # This is the point to annotate
                          textcoords="offset points",  # how to position the text
                          xytext=(5, 0),
                          fontsize=6,# distance from text to points (x,y)
-                         ha='left')  # horizontal alignment can be left, right or center
+                         ha='left')  # horizontal alignment can be left, right or center'''
 
         plotted_labels.append(target)
 
@@ -166,8 +225,8 @@ def Plot_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE):
 
 
 
-OdeAbreve = 'BolBhydeMin'
-odors = 'benzylalcohol|benzaldehyde|mineraloil'
+OdeAbreve = 'LimLoMin'
+odors = 'limonene|lemonoil|mineraloil'
 
 
 data=f'/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Results/ControlSubtracted/' \

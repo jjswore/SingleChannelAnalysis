@@ -112,7 +112,10 @@ def main(data, POPULATION_SIZE, TOURNAMENT_SIZE, CROSS_PROB, MUT_PROB, G):
     toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
     hof = tools.HallOfFame(1)
     print('populating.....')
+    hardcoded_individual = creator.Individual({'lowcut': 0.02387528523404051, 'highcut': 6, 'order': 1})
+
     population = toolbox.population(n=POPULATION_SIZE)
+    population.append(hardcoded_individual)
     # perform evaluation of each individual in the population
     print('initial evaluation of the population')
     fitnesses = list(map(toolbox.evaluate, population, [data] * len(population)))

@@ -8,8 +8,8 @@ from scripts.Data_Visualization.Plot_PCA import Plot_PCA
 #==========================================================================================
 #Run the GA
 
-ODORS_L = ['mineraloil|benzaldehyde|benzylalcohol']
-ODEABEV_L = ['BolBhydeMin']
+ODORS_L = ['mineraloil|ylangylang|lemonoil']
+ODEABEV_L = ['YYLoMin']
 #DILUTIONS =['1k','1k','1k']
 
 for o, ob in zip(ODORS_L, ODEABEV_L):
@@ -26,9 +26,15 @@ for o, ob in zip(ODORS_L, ODEABEV_L):
     SaveDir=f'/Users/joshswore/PycharmProjects/SingleChannelAnalysis/' \
             f'Results/ControlSubtracted/{OdeAbrev}/'
 
+    BFSaveDir = f'{SaveDir}/Butterworth_Optimized_Filter/'
+    f'{OdeAbrev}_BestParams.csv'
+
     print('checking if Save Directory exists')
     if not os.path.exists(SaveDir):
         os.makedirs(SaveDir)
+
+    if not os.path.exists(BFSaveDir):
+        os.makedirs(BFSaveDir)
 
     df = pd.read_csv(data, index_col=0)
 
@@ -50,7 +56,7 @@ for o, ob in zip(ODORS_L, ODEABEV_L):
     # Concatenate train_features and train_labels_df
     df = pd.concat([train_features, train_labels_df], axis=1)
 
-    params, statistics=main(data=df, POPULATION_SIZE=100, TOURNAMENT_SIZE=3, CROSS_PROB=.5, MUT_PROB=.25, G=150)
+    params, statistics=main(data=df, POPULATION_SIZE=5, TOURNAMENT_SIZE=3, CROSS_PROB=.5, MUT_PROB=.25, G=150)
 
     buttered_df = apply_filter_to_dataframe(dataframe=DF.iloc[:, :5001],
                                                 lowcut=params['lowcut'],
