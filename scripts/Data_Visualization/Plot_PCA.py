@@ -83,7 +83,7 @@ def Plot_PCA_ExplainedVariance(DATADIR, ODENOTE, ODORS, CONC, TITLE):
 
     # Plot Results
     # ============================================================================================
-def Plot_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE):
+def Plot_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE, ANNOTATE=False):
     Odenotation = ODENOTE
     Concentration = CONC
     TITLE = TITLE
@@ -130,31 +130,32 @@ def Plot_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE):
     }
 
     Targets = list(PCA_DF['label'].unique())
-    n_std = 2  # for 95% confidence interval
+    print(Targets)
 
     plotted_labels = []  # List to keep track of labels we have plotted
 
     for target in Targets:
-        color, marker = label_color_dict.get(target)  # fetch color from the dictionary
-        indicesToKeep = PCA_DF['label'] == target
-        print(f'indicesToKeep {indicesToKeep}')
-        subset = PCA_DF.loc[indicesToKeep, ['PC 1', 'PC 2']]
-        plt.scatter(subset.loc[indicesToKeep, 'PC 1']
-                    , subset.loc[indicesToKeep, 'PC 2'], color=color[0], marker=color[1], edgecolors='black', s=60,
+        print(target)
+        color = label_color_dict.get(target)  # fetch color from the dictionary
+        print(color)
+        if color is None:
+            continue
+        indicesToKeep = (PCA_DF['label']) == target
+        subset = PCA_DF.loc[indicesToKeep]
+        plt.scatter(PCA_DF.loc[indicesToKeep, 'PC 1']
+                    , PCA_DF.loc[indicesToKeep, 'PC 2'], color=color[0], marker=color[1], edgecolors='black', s=60,
                     label=target)
-        print(f'subset is {subset}')
-
         plotted_labels.append(target)
+        if ANNOTATE == True:
+            for i in subset.index:
+                plt.annotate(subset.loc[i, 'date'],  # This is the text to use for the annotation
+                             (subset.loc[i, 'PC 1'], subset.loc[i, 'PC 2']),  # This is the point to annotate
+                             textcoords="offset points",  # how to position the text
+                             xytext=(5, 0),
+                             fontsize=6,  # distance from text to points (x,y)
+                             ha='left')  # horizontal alignment can be left, right or center
 
-        for i in subset.index:
-            plt.annotate(subset.loc[i, 'date'],  # This is the text to use for the annotation
-                         (subset.loc[i, 'PC 1'], subset.loc[i, 'PC 2']),  # This is the point to annotate
-                         textcoords="offset points",  # how to position the text
-                         xytext=(5, 0),
-                         fontsize=6,# distance from text to points (x,y)
-                         ha='left')  # horizontal alignment can be left, right or center
 
-        plotted_labels.append(target)
 
     plt.legend(plotted_labels, markerscale=1.5
                , fontsize=20, frameon=False)
