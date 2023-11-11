@@ -8,21 +8,27 @@ from scripts.Data_Visualization.Plot_PCA import Plot_PCA
 #==========================================================================================
 #Run the GA
 
-ODORS_L = ['mineraloil|ylangylang|lemonoil']
-ODEABEV_L = ['YYLoMin']
-#DILUTIONS =['1k','1k','1k']
+ODORS_L = 'mineraloil|ylangylang|lemonoil|roseoil'
+ODEABEV_L = ['YYLoRoMin-1k10k', 'YYLoRoMin-1k100', 'YYLoRoMin-1k10k100']
+DILUTIONS =['1k|10k','1k|100','1k|10k|100']
 
-for o, ob in zip(ODORS_L, ODEABEV_L):
+data='/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Data/ControlSubtracted/Normalized/NoFilt/' \
+         'Dataframes/QualityControlled/_QC_T_1.csv'
+
+df = pd.read_csv(data, index_col=0)
+
+data_df = Reduce_Ctrl_Samples(DF=df)
+
+for ob, dil in zip(ODEABEV_L, DILUTIONS):
     # ... rest of the code ...
 
     print('beginning Optimization')
     start = time.time()
 
-    data='/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Data/ControlSubtracted/Normalized/NoFilt/' \
-         'Dataframes/QualityControlled/_QC_T_1.csv'
-    odors = o#'mineraloil|limonene|lemonoil'
-    OdeAbrev = ob #'LimLoMin'
-    concentration = '1k'
+
+    odors = ODORS_L
+    OdeAbrev = ob
+    concentration = dil
     SaveDir=f'/Users/joshswore/PycharmProjects/SingleChannelAnalysis/' \
             f'Results/ControlSubtracted/{OdeAbrev}/'
 
@@ -36,9 +42,6 @@ for o, ob in zip(ODORS_L, ODEABEV_L):
     if not os.path.exists(BFSaveDir):
         os.makedirs(BFSaveDir)
 
-    df = pd.read_csv(data, index_col=0)
-
-    data_df = Reduce_Ctrl_Samples(DF=df)
 
     DF=data_df[data_df['concentration'].str.contains(concentration)]
     DF=DF[DF['label'].str.contains(odors)]
@@ -56,7 +59,7 @@ for o, ob in zip(ODORS_L, ODEABEV_L):
     # Concatenate train_features and train_labels_df
     df = pd.concat([train_features, train_labels_df], axis=1)
 
-    params, statistics=main(data=df, POPULATION_SIZE=5, TOURNAMENT_SIZE=3, CROSS_PROB=.5, MUT_PROB=.25, G=150)
+    params, statistics=main(data=df, POPULATION_SIZE=98, TOURNAMENT_SIZE=3, CROSS_PROB=.5, MUT_PROB=.25, G=150)
 
     buttered_df = apply_filter_to_dataframe(dataframe=DF.iloc[:, :5001],
                                                 lowcut=params['lowcut'],

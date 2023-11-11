@@ -167,7 +167,7 @@ def Plot_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE, ANNOTATE=False):
 
 
 
-OdeAbreve = 'BolBhydeMin'
+'''OdeAbreve = 'BolBhydeMin'
 odors = 'benzylalcohol|benzaldehyde|mineraloil'
 
 
@@ -177,5 +177,5 @@ concentration = '1k'
 SaveDir=f'/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Results/ControlSubtracted/' \
         f'{OdeAbreve}/PCA/'
 
-Plot_PCA(DATADIR=data,ODENOTE=OdeAbreve,CONC=concentration,ODORS=odors,TITLE=f'')
+Plot_PCA(DATADIR=data,ODENOTE=OdeAbreve,CONC=concentration,ODORS=odors,TITLE=f'')'''
 
