@@ -98,7 +98,7 @@ def dict_mate(ind1, ind2, eta, indpb):
             o['order'] = int(round(max(1, min(4, o['order']))))
     return o1, o2
 
-def main(data, POPULATION_SIZE, TOURNAMENT_SIZE, CROSS_PROB, MUT_PROB, G):
+def main(data, POPULATION_SIZE, TOURNAMENT_SIZE, CROSS_PROB, MUT_PROB, Early_Stop, G):
     # Register the custom initialization function in the toolbox
     print('initializing.....')
     creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -137,18 +137,15 @@ def main(data, POPULATION_SIZE, TOURNAMENT_SIZE, CROSS_PROB, MUT_PROB, G):
     g = 0
     max_fitnesses = []
     no_improvement = 0
-    MAX_NO_IMPROVEMENT = 15  # change this to the number of generations without improvement you want to tolerate
+    MAX_NO_IMPROVEMENT = Early_Stop  # change this to the number of generations without improvement you want to tolerate
     while g < G:
         max_fitness = round(max(fits), 5)
-        if max_fitnesses and max_fitness <= max(max_fitnesses):
-            no_improvement += 1
-        else:
-            no_improvement = 0
+        #if max_fitnesses and max_fitness <= max(max_fitnesses):
+            #no_improvement += 1
+        #else:
+            #no_improvement = 0
         max_fitnesses.append(max_fitness)
 
-        if no_improvement >= MAX_NO_IMPROVEMENT:
-            print(f"Stopping early: Maximum fitness hasn't improved for {MAX_NO_IMPROVEMENT} generations.")
-            break
     # print generation number
         g = g + 1
         #print(f' Generation: {g}')
@@ -184,7 +181,21 @@ def main(data, POPULATION_SIZE, TOURNAMENT_SIZE, CROSS_PROB, MUT_PROB, G):
         #for individual in population:
         #    print(f'Individual: {individual}, Fitness: {individual.fitness.values[0]}')
 
+
         hof.update(population)
+        if g > 1:
+            if previous_parameters == hof[0]:
+                no_improvement += 1
+                previous_parameters = hof[0]
+            else:
+                no_improvement = 0
+                previous_parameters = hof[0]
+        else:
+            previous_parameters = hof[0]
+
+        if no_improvement >= MAX_NO_IMPROVEMENT:
+            print(f"Stopping early: Maximum fitness hasn't improved for {MAX_NO_IMPROVEMENT} generations.")
+            break
 
         fits = [ind.fitness.values[0] for ind in population]
         #calculate some statistics about the population
