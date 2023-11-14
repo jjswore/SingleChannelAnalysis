@@ -200,7 +200,7 @@ def SVM_GridSearch(data, concentration, odors):
 
     # Set hyperparameters to search over
     kernel = ['rbf']
-    C = [1, 4, 5, 7, 7.5, 8, 9, 10, 12.5, 15, 17.5, 20, 22.5, 25]
+    C = [0.5, 1, 4, 5, 7, 7.5, 8, 9, 10, 12.5, 15, 17.5, 20, 22.5, 25, 30, 40]
     degree = [0, 0.01, 0.05, 0.1, 0.5]
     gamma = ['scale', 'auto', 0.1, 0.2, 0.5]
     coef0 = [0, 0.05, 0.1, 0.2]

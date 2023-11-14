@@ -132,9 +132,11 @@ def EAG_All_Concentrations_Plot(file, waves):
 
 #def EAG_1_Conc_Plot(file, waves):
 
-file ='/Users/joshswore/PycharmProjects/SingleChannelAnalysis/' \
-          'Data/ControlSubtracted/Normalized/BF.1_2_/' \
-          'Dataframes/QualityControlled/_QC_T_1.csv'
+#file ='/Users/joshswore/PycharmProjects/SingleChannelAnalysis/' \
+#          'Data/ControlSubtracted/Normalized/BF.1_2_/' \
+#          'Dataframes/QualityControlled/_QC_T_1.csv'
+
+file ='/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Data/ControlSubtracted/Normalized/BF.1_2_/Dataframes/QualityControlled/_QC_T_1.csv'
 
 EAGS =['080422m1a11klimonene0001wave0',
        '082222m2a11klemonoil0000wave1',
@@ -152,7 +154,7 @@ DF.index = DF.index.astype(float) / 1000
 # 1k
 Limonene1k = DF[EAGS[0]]
 LemonOil1k = DF[EAGS[1]]
-MineralOil1k = DF[EAGS[2]] - DF[EAGS[2]]
+MineralOil1k = DF[EAGS[2]]# - DF[EAGS[2]]
 
 colors = plt.cm.Paired(np.linspace(0, 1, 8))
 
@@ -183,12 +185,12 @@ plotted_labels = ['Limonene', 'Lemon Oil', 'Mineral Oil (Ctrl)']
 
 
 Limonene1k.plot(color=label_color_dict.get('limonene')[0], linewidth=3)
-LemonOil1k.plot(color=label_color_dict.get('lemonoil')[0], linewidth=3)
+#LemonOil1k.plot(color=label_color_dict.get('lemonoil')[0], linewidth=3)
 MineralOil1k.plot(color=label_color_dict.get('mineraloil')[0], linewidth=3)
 
 ax.legend(plotted_labels, markerscale=1.5, fontsize=20, frameon=False)
-plt.savefig('/Users/joshswore/PycharmProjects/'
-            'SingleChannelAnalysis/EAG_WAVE_Plots/LimLoMin1k.svg')
+#plt.savefig('/Users/joshswore/PycharmProjects/'
+            #'SingleChannelAnalysis/EAG_WAVE_Plots/LimLoMin1k.svg')
 plt.show()
 
 

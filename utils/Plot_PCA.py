@@ -1,11 +1,9 @@
 import pandas as pd
-from sklearn.neighbors import KernelDensity
 import os
 import pickle
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 from matplotlib import transforms
-from scipy.stats import gaussian_kde
 import numpy as np
 from sklearn.decomposition import PCA
 
@@ -107,13 +105,12 @@ def draw_confidence_ellipse(ax, data, n_std, label, color, marker):
     ax.add_patch(ellipse)
 
     # Add scatter plot for this class
-    ax.scatter(data[:, 0], data[:, 1], color=color, marker=marker, edgecolors='black', s=60, label=label)
+    #ax.scatter(data[:, 0], data[:, 1], color=color, marker=marker, edgecolors='black', s=60, label=label)
 
 
-def Plot_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE):
+def Plot_PCA_Explained_Variance(DATADIR, ODENOTE, ODORS, CONC, TITLE, SAVE=True):
     # set the data to be loaded and set a save location
     Odenotation = ODENOTE
-    Concentration = CONC
     TITLE = TITLE
     DIR = f'{DATADIR}'
 
@@ -150,17 +147,36 @@ def Plot_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE):
     plt.gca().spines['top'].set_visible(False)
     plt.gca().spines['right'].set_visible(False)
     plt.text(text_x_pos, text_y_pos, f'Explained Variance of First 2 PC\'s:{round(sum(PCAobj.explained_variance_ratio_[:2]), 2)}')
-    #plt.savefig(f'{SaveDir}{Odenotation}_ExplainedVariance.jpg')
-    #plt.savefig(f'{SaveDir}{Odenotation}_ExplainedVariance.svg')
+
+    if SAVE == True:
+        plt.savefig(f'{SaveDir}{Odenotation}_ExplainedVariance.jpg')
+        plt.savefig(f'{SaveDir}{Odenotation}_ExplainedVariance.svg')
     plt.show()
 
     # Plot Results
     # ============================================================================================
+def Plot_2D_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE, SAVE=True):
+    Odenotation = ODENOTE
+    TITLE = TITLE
+    DIR = f'{DATADIR}'
+
+    PCA_df = f'{DIR}/{Odenotation}_PCA.csv'
+    SaveDir = f'{DIR}/'
+
+    # make sure the folder for saving exists
+    if not os.path.exists(SaveDir):
+        os.makedirs(SaveDir)
+
+    # open the PCA_DF into a dataframe
+    data_df = pd.read_csv(PCA_df, index_col=0)
+    DF = data_df[data_df['concentration'].str.contains(CONC)]
+    # print(DF)
+    PCA_DF = DF[DF['label'].str.contains(ODORS)]
 
     plt.figure()
     plt.figure(figsize=(10, 10))
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=14)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
     plt.xlabel('PC 1', fontsize=25)
     plt.ylabel('PC 2', fontsize=25)
     plt.title(TITLE, fontsize=25)
@@ -202,9 +218,11 @@ def Plot_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE):
         #plot_filled_contour(plt.gca(), subset, n_std, target, label_color_dict[target][0])
         #plot_kde_sklearn(plt.gca(), subset, target, color)
         #add_std_dev_shading(plt.gca(), subset, target, color)
+
+        #make sure to append targets twice once prior to calling draw_conficence_ellipse and once after
+        plotted_labels.append(target)
         draw_confidence_ellipse(plt.gca(), subset, n_std, target, color, marker)
         plotted_labels.append(target)
-        print(plotted_labels)
 
         '''for i in subset.index:
             plt.annotate(subset.loc[i, 'date'],  # This is the text to use for the annotation
@@ -218,23 +236,11 @@ def Plot_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE):
 
     plt.legend(plotted_labels, markerscale=1.5
                , fontsize=20, frameon=False)
-
-    #plt.savefig(f'{SaveDir}{Odenotation}_PCA.jpg')
-    #plt.savefig(f'{SaveDir}{Odenotation}_PCA.svg')
+    if SAVE == True:
+        plt.savefig(f'{SaveDir}{Odenotation}_PCA.jpg')
+        plt.savefig(f'{SaveDir}{Odenotation}_PCA.svg')
     plt.show()
 
 
 
-
-OdeAbreve = 'LimMin'
-odors = 'limonene|mineraloil'
-
-
-data=f'/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Results/ControlSubtracted/' \
-     f'{OdeAbreve}/PCA/'
-concentration = '1k'
-SaveDir=f'/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Results/ControlSubtracted/' \
-        f'{OdeAbreve}/PCA/'
-
-Plot_PCA(DATADIR=data,ODENOTE=OdeAbreve,CONC=concentration,ODORS=odors,TITLE=f'')
 
