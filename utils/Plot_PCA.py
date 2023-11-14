@@ -161,7 +161,7 @@ def Plot_2D_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE, SAVE=True):
     DIR = f'{DATADIR}'
 
     PCA_df = f'{DIR}/{Odenotation}_PCA.csv'
-    SaveDir = f'{DIR}/'
+    SaveDir = f'{DIR}/figures/'
 
     # make sure the folder for saving exists
     if not os.path.exists(SaveDir):
@@ -221,8 +221,17 @@ def Plot_2D_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE, SAVE=True):
 
         #make sure to append targets twice once prior to calling draw_conficence_ellipse and once after
         plotted_labels.append(target)
+
+    plt.legend(plotted_labels, markerscale=1.5
+               , fontsize=24, frameon=False)
+
+    for target in Targets:
+        color, marker = label_color_dict.get(target)  # fetch color from the dictionary
+        indicesToKeep = PCA_DF['label'] == target
+        # print(f'indicesToKeep {indicesToKeep}')
+        subset = PCA_DF.loc[indicesToKeep, ['PC 1', 'PC 2']]
         draw_confidence_ellipse(plt.gca(), subset, n_std, target, color, marker)
-        plotted_labels.append(target)
+        #plotted_labels.append(target)
 
         '''for i in subset.index:
             plt.annotate(subset.loc[i, 'date'],  # This is the text to use for the annotation
@@ -232,10 +241,6 @@ def Plot_2D_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE, SAVE=True):
                          fontsize=6,# distance from text to points (x,y)
                          ha='left')  # horizontal alignment can be left, right or center'''
 
-
-
-    plt.legend(plotted_labels, markerscale=1.5
-               , fontsize=20, frameon=False)
     if SAVE == True:
         plt.savefig(f'{SaveDir}{Odenotation}_PCA.jpg')
         plt.savefig(f'{SaveDir}{Odenotation}_PCA.svg')
