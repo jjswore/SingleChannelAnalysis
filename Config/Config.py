@@ -1,0 +1,1 @@
+ControlSUB_ResultsDir = '/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Results/ControlSubtracted'

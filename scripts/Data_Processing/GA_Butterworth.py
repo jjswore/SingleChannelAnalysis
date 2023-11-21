@@ -4,16 +4,16 @@ from utils.SubSample_Control import Reduce_Ctrl_Samples
 import time
 import os
 from EAG_PCA import EAG_PCA
-from scripts.Data_Visualization.Plot_PCA import Plot_PCA
+from utils.Plot_PCA import Plot_2D_PCA
 #==========================================================================================
 #Run the GA
 
-ODORS_L = 'mineraloil|ylangylang|lemonoil|roseoil'
-ODEABEV_L = ['YYLoRoMin-1k10k', 'YYLoRoMin-1k100', 'YYLoRoMin-1k10k100']
-DILUTIONS =['1k|10k','1k|100','1k|10k|100']
+ODORS_L = 'ylangylang|roseoil|mineraloil|lemonoil'
+ODEABEV_L = [ 'YYLoRoMin-100']
+DILUTIONS =['100']
 
 data='/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Data/ControlSubtracted/Normalized/NoFilt/' \
-         'Dataframes/QualityControlled/_QC_T_1.csv'
+         'Dataframes/QualityControlled/_QC_T_0.5.csv'
 
 df = pd.read_csv(data, index_col=0)
 
@@ -50,8 +50,8 @@ for ob, dil in zip(ODEABEV_L, DILUTIONS):
     train_features, test_features, train_labels, test_labels =TT_Split(DF, .5)
     Training_data = pd.concat([train_features, train_labels], axis=1)
     Test_data = pd.concat([test_features, test_labels], axis=1)
-    Training_data.to_csv(f'{SaveDir}{OdeAbrev}_trainingDF.csv')
-    Test_data.to_csv(f'{SaveDir}{OdeAbrev}_testingDF.csv')
+    Training_data.to_csv(f'{BFSaveDir}{OdeAbrev}_trainingDF.csv')
+    Test_data.to_csv(f'{BFSaveDir}{OdeAbrev}_testingDF.csv')
     # Get the indices of the train_features DataFrame
     train_indices = train_features.index
     # Select the corresponding rows from the LLL_df
@@ -59,7 +59,7 @@ for ob, dil in zip(ODEABEV_L, DILUTIONS):
     # Concatenate train_features and train_labels_df
     df = pd.concat([train_features, train_labels_df], axis=1)
 
-    params, statistics=main(data=df, POPULATION_SIZE=98, TOURNAMENT_SIZE=3, CROSS_PROB=.5, MUT_PROB=.25, G=150)
+    params, statistics=main(data=df, POPULATION_SIZE=98, TOURNAMENT_SIZE=3, CROSS_PROB=.5, MUT_PROB=.35, Early_Stop=15, G=150)
 
     buttered_df = apply_filter_to_dataframe(dataframe=DF.iloc[:, :5001],
                                                 lowcut=params['lowcut'],
@@ -77,15 +77,16 @@ for ob, dil in zip(ODEABEV_L, DILUTIONS):
     PDF = pd.DataFrame.from_dict(params, orient='index').T
 
 
-    PDF.to_csv(f'{SaveDir}/Butterworth_Optimized_Filter/'
+    PDF.to_csv(f'{BFSaveDir}'
                f'{OdeAbrev}_BestParams.csv')
-    BDF.to_csv(f'{SaveDir}/Butterworth_Optimized_Filter/'
+    BDF.to_csv(f'{BFSaveDir}'
                f'{OdeAbrev}_finalDF.csv')
-    STATSDF.to_csv(f'{SaveDir}Butterworth_Optimized_Filter/'
+    STATSDF.to_csv(f'{BFSaveDir}'
                    f'{OdeAbrev}_STATS.csv')
     print('Computing PC')
     EAG_PCA(BDF,f'{SaveDir}',concentration,odors, OdeAbrev)
-    Plot_PCA(DATADIR=f'{SaveDir}/PCA/',ODENOTE=OdeAbrev,CONC=concentration,ODORS=odors,TITLE='')
+    Plot_2D_PCA(DATADIR=f'{SaveDir}/PCA/',OA=OdeAbrev,CONC=concentration,ODORS=odors,TITLE='',SAVE=True)
+
     print('the entire code has finished')
 
 ## from here I need to decide how I will proceed... Do I reprocess my data? no I think I return the best

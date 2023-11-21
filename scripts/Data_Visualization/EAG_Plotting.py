@@ -41,7 +41,7 @@ def Find_Prospective_Waves(CSV, Odor, Conc):
                 plt.title(file)
                 #plt.ylim()
                 plt.xlim(0, 6000)
-                plt.ylim(-.5,.25)
+                plt.ylim(-1,.45)
                 plt.show()
                 print(file)
                 ans = input('does the file look good?')
@@ -135,64 +135,69 @@ def EAG_All_Concentrations_Plot(file, waves):
 #file ='/Users/joshswore/PycharmProjects/SingleChannelAnalysis/' \
 #          'Data/ControlSubtracted/Normalized/BF.1_2_/' \
 #          'Dataframes/QualityControlled/_QC_T_1.csv'
-
-file ='/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Data/ControlSubtracted/Normalized/BF.1_2_/Dataframes/QualityControlled/_QC_T_1.csv'
-
-EAGS =['080422m1a11klimonene0001wave0',
-       '082222m2a11klemonoil0000wave1',
-       '080522m1a11kmineraloil0005wave0']
-
-DF = pd.read_csv(file, index_col=0).T
-
-# Find_Prospective_Waves(file, 'lemonoil', '100')
-
-DF = DF.iloc[:-3, :]
-DF.index = pd.to_numeric(DF.index)
-DF.index = DF.index.astype(float) / 1000
-#print(type(DF.index[0]))
-
-# 1k
-Limonene1k = DF[EAGS[0]]
-LemonOil1k = DF[EAGS[1]]
-MineralOil1k = DF[EAGS[2]]# - DF[EAGS[2]]
-
-colors = plt.cm.Paired(np.linspace(0, 1, 8))
-
-label_color_dict = {
-    'limonene': [colors[0], 'o'],
-    'lemonoil': [colors[1], 'o'],
-    'ylangylang': [colors[2], 'o'],
-    'roseoil': [colors[3], 's'],
-    'benzylalcohol': [colors[4], 's'],
-    '1octen3ol': [colors[5], '^'],
-    'benzaldehyde': [colors[6], 'o'],
-    'linalool': [colors[7], '^'],
-    'mineraloil': ['grey', 'P'], }
-
-fig, ax = plt.subplots(figsize=(10, 10))
-fig.set_facecolor('white')
-
-ax.set_facecolor('white')
-ax.spines['top'].set_visible(False)
-ax.spines['right'].set_visible(False)
-
-ax.set_ylabel('Normalized Response', fontsize=25)
-ax.set_xlabel('Time (s)', fontsize=25)
-ax.set_ylim(-.4, .4)
-plt.xticks(fontsize=14)
-plt.yticks(fontsize=14)
-plotted_labels = ['Limonene', 'Lemon Oil', 'Mineral Oil (Ctrl)']
+def Plot_Comparative_EAGS(file, EAGS, SAVEDIR=None):
 
 
-Limonene1k.plot(color=label_color_dict.get('limonene')[0], linewidth=3)
-#LemonOil1k.plot(color=label_color_dict.get('lemonoil')[0], linewidth=3)
-MineralOil1k.plot(color=label_color_dict.get('mineraloil')[0], linewidth=3)
+    DF = pd.read_csv(file, index_col=0).T
 
-ax.legend(plotted_labels, markerscale=1.5, fontsize=20, frameon=False)
-#plt.savefig('/Users/joshswore/PycharmProjects/'
-            #'SingleChannelAnalysis/EAG_WAVE_Plots/LimLoMin1k.svg')
-plt.show()
+    # Find_Prospective_Waves(file, 'lemonoil', '100')
+
+    DF = DF.iloc[:-3, :]
+    DF.index = pd.to_numeric(DF.index)
+    DF.index = DF.index.astype(float) / 1000
+    #print(type(DF.index[0]))
+
+    # 1k
+    Linalool1k = DF[EAGS[0]]
+    YlangYlang1k = DF[EAGS[1]]
+    MineralOil1k = DF[EAGS[2]]# - DF[EAGS[2]]
+
+    colors = plt.cm.Paired(np.linspace(0, 1, 8))
+
+    label_color_dict = {
+        'limonene': [colors[0], 'o'],
+        'lemonoil': [colors[1], 'o'],
+        'ylangylang': [colors[2], 'o'],
+        'roseoil': [colors[3], 's'],
+        'benzylalcohol': [colors[4], 's'],
+        '1octen3ol': [colors[5], '^'],
+        'benzaldehyde': [colors[6], 'o'],
+        'linalool': [colors[7], '^'],
+        'mineraloil': ['grey', 'P'], }
+
+    fig, ax = plt.subplots(figsize=(10, 10))
+    fig.set_facecolor('white')
+
+    ax.set_facecolor('white')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
+    ax.set_ylabel('Normalized Response', fontsize=25)
+    ax.set_xlabel('Time (s)', fontsize=25)
+    ax.set_ylim(-1, .4)
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
+    plotted_labels = ['Linalool', 'Rose Oil', 'Mineral Oil (Ctrl)']
 
 
+    Linalool1k.plot(color=label_color_dict.get('linalool')[0], linewidth=3)
+    YlangYlang1k.plot(color=label_color_dict.get('roseoil')[0], linewidth=3)
+    MineralOil1k.plot(color=label_color_dict.get('mineraloil')[0], linewidth=3)
 
+    ax.legend(plotted_labels, markerscale=1.5, fontsize=20, frameon=False)
+    if SAVEDIR != None:
+        plt.savefig(f'{SAVEDIR}.jpg')
+        plt.savefig(f'{SAVEDIR}.svg')
+    plt.show()
+
+
+file = '/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Data/ControlSubtracted/Normalized/BF.1_2_/Dataframes/QualityControlled/_QC_T_1.csv'
+
+EAGS = ['082922m3a11klinalool0000wave2',
+        '082222m1a11kroseoil0000wave2',
+        '080522m1a11kmineraloil0005wave0']
+
+Plot_Comparative_EAGS(file=file, EAGS=EAGS, SAVEDIR='/Users/joshswore/PycharmProjects/'
+                                                 'SingleChannelAnalysis/EAG_WAVE_Plots/RoLinMin')
+#Find_Prospective_Waves(CSV=file, Odor='ylangylang', Conc='1k')
 #EAG_1_Conc_Plot(file, EAGS)

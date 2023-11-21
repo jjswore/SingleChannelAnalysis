@@ -6,9 +6,6 @@ from collections import defaultdict
 import seaborn as sns
 from sklearn.metrics import ConfusionMatrixDisplay
 import pickle
-
-
-
 def name_con(f):
     n = os.path.basename(f)
     tn = n.split("_")
@@ -60,17 +57,19 @@ def extract_CM(DF, cumulative=False, ACC=True):
 def plot_CM(CM,LABELS,TITLE, YROT=0, XROT=90, SAVEDIR=None):
     fig, ax = plt.subplots(figsize=(10, 10))
 
-    '''plt.tick_params(axis='both', rotation=XROT)
-    plt.yticks(fontsize=14,weight='bold', rotation=YROT)
-    plt.title(TITLE ,fontsize=20, y=1.05, weight='bold')
-    plt.xticks(fontsize=14, weight='bold', rotation=XROT)'''
     disp=ConfusionMatrixDisplay(CM,display_labels=LABELS)
     CMDISP=disp.plot(cmap=plt.cm.Blues,ax=ax)
 
+    for labels in disp.text_:
+        for label in labels:
+            label.set_fontsize(20)
+
     ax.set_xticks(np.arange(len(LABELS)))
     ax.set_yticks(np.arange(len(LABELS)))
-    ax.set_xticklabels(LABELS, fontsize=14, weight='bold', rotation=XROT)
-    ax.set_yticklabels(LABELS, fontsize=14, weight='bold', rotation=YROT)
+    ax.set_xticklabels(LABELS, fontsize=24, rotation=XROT)
+    ax.set_yticklabels(LABELS, fontsize=24, rotation=YROT)
+    plt.ylabel('$\it{True}$', fontsize=20)
+    plt.xlabel('$\it{Predicted}$', fontsize=20)
 
     cbar = ax.images[-1].colorbar
     cbar.mappable.set_clim(0, 1)
@@ -78,22 +77,59 @@ def plot_CM(CM,LABELS,TITLE, YROT=0, XROT=90, SAVEDIR=None):
     for label in ax.get_yticklabels():
         label.set_va('center')
 
-    if SAVEDIR != None:
+    plt.subplots_adjust(left=.1, right=1.05, top=.99, bottom=.01)
+
+    if SAVEDIR is not None:
 
         print('Saving Fig...')
-        plt.savefig(f'{SAVEDIR}Confusion_Matrix.jpg')
-        plt.savefig(f'{SAVEDIR}Confusion_Matrix.svg')
+        plt.savefig(os.path.join(f'{SAVEDIR}Confusion_Matrix.jpg'))
+        plt.savefig(os.path.join(f'{SAVEDIR}Confusion_Matrix.svg'))
 
     else:
         print('Figure is not saved')
     plt.show()
     return CMDISP
 
-def ViPlot(DATA, TITLE, N_Odors, SAVEDIR=None):
+def ViPlot(DATA, TITLE, N_Odors, INNER='box', DisplayMean=True, SAVEDIR=None):
+    plt.figure(figsize=(18, 9))
+    plt.xticks(None)
+    plt.yticks(fontsize=14, weight='bold')
+    #plt.xlabel('Dataset', fontsize=20, weight='bold')
+    plt.ylabel('Accuracy', fontsize=20, weight='bold')
+    plt.title(TITLE, fontsize=20)
+    plt.ylim(0, 1)
+    plt.axhline(y=(1 / N_Odors), linestyle='--', color='black')
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
+
+    # Create the violin plot
+    ax = sns.violinplot(data=DATA, color="skyblue", linewidth=5, inner=INNER)
+    if INNER != 'box':
+        sns.swarmplot(data=DATA, color="steelblue", size=8)
+
+
+    # Calculate the mean for each column
+    if DisplayMean == True:
+        means = DATA.mean()
+
+        # Add annotations to the plot
+        for i, mean in enumerate(means):
+            ax.text(i, mean, f'Mean: {mean:.2f}', ha='center', va='top', fontsize=20)
+
+    plt.ylim(0, 1.1)
+    plt.tight_layout()
+    if SAVEDIR is not None:
+        print('Saving Fig...')
+        plt.savefig(f'{SAVEDIR}ViPlot.jpg')
+        plt.savefig(f'{SAVEDIR}ViPlot.svg')
+    plt.show()
+
+
+def BoxPlot(DATA, TITLE, N_Odors, SAVEDIR=None):
     plt.figure(figsize=(18, 9))
     plt.xticks(rotation=0, fontsize=12, weight='bold')
     plt.yticks(fontsize=14, weight='bold')
-    plt.xlabel('Dataset', fontsize=20, weight='bold')
+    #plt.xlabel('Dataset', fontsize=20, weight='bold')
     plt.ylabel('Mean Accuracy', fontsize=20, weight='bold')
     plt.title(TITLE, fontsize=20)
     plt.ylim(0, 1)
@@ -102,20 +138,21 @@ def ViPlot(DATA, TITLE, N_Odors, SAVEDIR=None):
     plt.gca().spines['right'].set_visible(False)
 
     # Create the violin plot
-    ax = sns.violinplot(data=DATA, color="skyblue")
+    #ax = sns.boxplot(data=DATA, color="skyblue")
 
+    sns.boxplot(data=DATA, color=".9")#, inner=None)
+    #sns.swarmplot(data=DATA, size=3)
     # Calculate the mean for each column
     means = DATA.mean()
 
     # Add annotations to the plot
-    for i, mean in enumerate(means):
-        ax.text(i, mean, f'Mean: {mean:.2f}', ha='center', va='top', fontsize=12)
+    #for i, mean in enumerate(means):
+        #ax.text(i, mean, f'Mean: {mean:.2f}', ha='center', va='top', fontsize=20)
 
     plt.ylim(0, 1.1)
     plt.tight_layout()
-    if SAVEDIR != None:
+    if SAVEDIR is not None:
         print('Saving Fig...')
         plt.savefig(f'{SAVEDIR}ViPlot.jpg')
         plt.savefig(f'{SAVEDIR}ViPlot.svg')
     plt.show()
-

@@ -155,12 +155,12 @@ def Plot_PCA_Explained_Variance(DATADIR, ODENOTE, ODORS, CONC, TITLE, SAVE=True)
 
     # Plot Results
     # ============================================================================================
-def Plot_2D_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE, SAVE=True):
-    Odenotation = ODENOTE
+def Plot_2D_PCA(DATADIR, OA, ODORS, CONC, TITLE, SAVE=True):
+    OderAbreve = OA
     TITLE = TITLE
     DIR = f'{DATADIR}'
 
-    PCA_df = f'{DIR}/{Odenotation}_PCA.csv'
+    PCA_df = f'{DIR}/{OderAbreve}_PCA.csv'
     SaveDir = f'{DIR}/figures/'
 
     # make sure the folder for saving exists
@@ -168,7 +168,9 @@ def Plot_2D_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE, SAVE=True):
         os.makedirs(SaveDir)
 
     # open the PCA_DF into a dataframe
-    data_df = pd.read_csv(PCA_df, index_col=0)
+    data_df = pd.read_csv(PCA_df, index_col=0,dtype={'concentration': 'string'})
+
+    print(data_df['concentration'].dtype)
     DF = data_df[data_df['concentration'].str.contains(CONC)]
     # print(DF)
     PCA_DF = DF[DF['label'].str.contains(ODORS)]
@@ -242,9 +244,11 @@ def Plot_2D_PCA(DATADIR, ODENOTE, ODORS, CONC, TITLE, SAVE=True):
                          ha='left')  # horizontal alignment can be left, right or center'''
 
     if SAVE == True:
-        plt.savefig(f'{SaveDir}{Odenotation}_PCA.jpg')
-        plt.savefig(f'{SaveDir}{Odenotation}_PCA.svg')
+        plt.savefig(f'{SaveDir}{OderAbreve}_PCA.jpg')
+        plt.savefig(f'{SaveDir}{OderAbreve}_PCA.svg')
     plt.show()
+
+
 
 
 
