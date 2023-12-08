@@ -125,7 +125,7 @@ def Plot_PCA_Explained_Variance(DATADIR, ODENOTE, ODORS, CONC, TITLE, SAVE=True)
         os.makedirs(SaveDir)
 
     # open the PCA_DF into a dataframe
-    data_df = pd.read_csv(PCA_df, index_col=0)
+    data_df = pd.read_csv(PCA_df, index_col=0,dtype={'concentration': 'string'})
     DF = data_df[data_df['concentration'].str.contains(CONC)]
     #print(DF)
     PCA_DF = DF[DF['label'].str.contains(ODORS)]
@@ -140,13 +140,14 @@ def Plot_PCA_Explained_Variance(DATADIR, ODENOTE, ODORS, CONC, TITLE, SAVE=True)
     text_y_pos = .4 * max(PCAobj.explained_variance_ratio_[:100])
 
     # Plot the explained variance
-    plt.scatter(range(100), PCAobj.explained_variance_ratio_[:100], color='brown')
-    plt.title('PCA Explained Variance')
+    plt.figure(figsize=(5, 5))
+    plt.scatter(range(100), PCAobj.explained_variance_ratio_[:100], color='grey', edgecolors='black', s=50)
+    plt.title(f'\n Explained Variance \n First 5 PC\'s:{round(sum(PCAobj.explained_variance_ratio_[:5]), 2)}', fontsize=18)
     plt.ylabel('Explained Variance (%)')
     plt.xlabel('Principal Component')
     plt.gca().spines['top'].set_visible(False)
     plt.gca().spines['right'].set_visible(False)
-    plt.text(text_x_pos, text_y_pos, f'Explained Variance of First 2 PC\'s:{round(sum(PCAobj.explained_variance_ratio_[:2]), 2)}')
+    #plt.text(text_x_pos, text_y_pos, f'Explained Variance \n First 5 PC\'s:{round(sum(PCAobj.explained_variance_ratio_[:5]), 2)}',fontsize=14)
 
     if SAVE == True:
         plt.savefig(f'{SaveDir}{Odenotation}_ExplainedVariance.jpg')
@@ -182,6 +183,89 @@ def Plot_2D_PCA(DATADIR, OA, ODORS, CONC, TITLE, SAVE=True):
     plt.xlabel('PC 1', fontsize=25)
     plt.ylabel('PC 2', fontsize=25)
     plt.title(TITLE, fontsize=25)
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
+
+
+    # Create a dictionary mapping labels to colors
+
+    colors = plt.cm.Paired(np.linspace(0, 1, 8))
+
+    label_color_dict = {
+        'limonene': [colors[0], '^'],
+        'lemonoil': [colors[1], 's'],
+        'ylangylang':[ colors[2], 'o'],
+        'roseoil': [colors[3], '^'],
+        'benzylalcohol': [colors[4],'s'],
+        '1octen3ol': [colors[5], '^'],
+        'benzaldehyde': [colors[6], 'o'],
+        'linalool': [colors[7], '^'],
+        'mineraloil': ['grey', 'P'],
+    }
+
+    Targets = list(PCA_DF['label'].unique())
+    n_std = 2  # for 95% confidence interval
+
+    plotted_labels = []  # List to keep track of labels we have plotted
+
+    for target in Targets:
+        color, marker = label_color_dict.get(target)  # fetch color from the dictionary
+        indicesToKeep = PCA_DF['label'] == target
+        #print(f'indicesToKeep {indicesToKeep}')
+        subset = PCA_DF.loc[indicesToKeep, ['PC 1', 'PC 2']]
+
+        #print(f'subset is {subset}')
+        plt.scatter(subset.loc[indicesToKeep, 'PC 1']
+                    , subset.loc[indicesToKeep, 'PC 2'], color=color, marker=marker, edgecolors='black', s=60,
+                    label=target)
+        #plot_filled_contour(plt.gca(), subset, n_std, target, label_color_dict[target][0])
+        #plot_kde_sklearn(plt.gca(), subset, target, color)
+        #add_std_dev_shading(plt.gca(), subset, target, color)
+
+        #make sure to append targets twice once prior to calling draw_conficence_ellipse and once after
+        plotted_labels.append(target)
+
+    plt.legend(plotted_labels, markerscale=1.5
+               , fontsize=24, frameon=False)
+
+    for target in Targets:
+        color, marker = label_color_dict.get(target)  # fetch color from the dictionary
+        indicesToKeep = PCA_DF['label'] == target
+        # print(f'indicesToKeep {indicesToKeep}')
+        subset = PCA_DF.loc[indicesToKeep, ['PC 1', 'PC 2']]
+        draw_confidence_ellipse(plt.gca(), subset, n_std, target, color, marker)
+        #plotted_labels.append(target)
+
+        '''for i in subset.index:
+            plt.annotate(subset.loc[i, 'date'],  # This is the text to use for the annotation
+                         (subset.loc[i, 'PC 1'], subset.loc[i, 'PC 2']),  # This is the point to annotate
+                         textcoords="offset points",  # how to position the text
+                         xytext=(5, 0),
+                         fontsize=6,# distance from text to points (x,y)
+                         ha='left')  # horizontal alignment can be left, right or center'''
+
+    if SAVE == True:
+        plt.savefig(f'{SaveDir}{OderAbreve}_PCA.jpg')
+        plt.savefig(f'{SaveDir}{OderAbreve}_PCA.svg')
+    plt.show()
+
+
+def Plot_2D_PCA_Simple(DF, SaveDir= None):
+
+    PCA_DF = DF
+    #SaveDir = f'{DIR}/figures/'
+
+    # make sure the folder for saving exists
+
+    # open the PCA_DF into a dataframe
+
+    plt.figure()
+    plt.figure(figsize=(16, 10))
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.xlabel('PC 1', fontsize=25)
+    plt.ylabel('PC 2', fontsize=25)
+    plt.title(None, fontsize=25)
     plt.gca().spines['top'].set_visible(False)
     plt.gca().spines['right'].set_visible(False)
 
@@ -243,13 +327,10 @@ def Plot_2D_PCA(DATADIR, OA, ODORS, CONC, TITLE, SAVE=True):
                          fontsize=6,# distance from text to points (x,y)
                          ha='left')  # horizontal alignment can be left, right or center'''
 
-    if SAVE == True:
-        plt.savefig(f'{SaveDir}{OderAbreve}_PCA.jpg')
-        plt.savefig(f'{SaveDir}{OderAbreve}_PCA.svg')
+    if SaveDir != None:
+        #plt.savefig(f'{SaveDir}_PCA.jpg')
+        plt.savefig(f'{SaveDir}')
     plt.show()
-
-
-
 
 
 

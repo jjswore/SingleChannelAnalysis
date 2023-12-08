@@ -1,3 +1,5 @@
+import re
+import matplotlib.patches as patches
 import pandas as pd
 from matplotlib import pyplot as plt
 import numpy as np
@@ -135,10 +137,12 @@ def EAG_All_Concentrations_Plot(file, waves):
 #file ='/Users/joshswore/PycharmProjects/SingleChannelAnalysis/' \
 #          'Data/ControlSubtracted/Normalized/BF.1_2_/' \
 #          'Dataframes/QualityControlled/_QC_T_1.csv'
+
 def Plot_Comparative_EAGS(file, EAGS, SAVEDIR=None):
 
 
     DF = pd.read_csv(file, index_col=0).T
+
 
     # Find_Prospective_Waves(file, 'lemonoil', '100')
 
@@ -146,11 +150,6 @@ def Plot_Comparative_EAGS(file, EAGS, SAVEDIR=None):
     DF.index = pd.to_numeric(DF.index)
     DF.index = DF.index.astype(float) / 1000
     #print(type(DF.index[0]))
-
-    # 1k
-    Linalool1k = DF[EAGS[0]]
-    YlangYlang1k = DF[EAGS[1]]
-    MineralOil1k = DF[EAGS[2]]# - DF[EAGS[2]]
 
     colors = plt.cm.Paired(np.linspace(0, 1, 8))
 
@@ -165,6 +164,18 @@ def Plot_Comparative_EAGS(file, EAGS, SAVEDIR=None):
         'linalool': [colors[7], '^'],
         'mineraloil': ['grey', 'P'], }
 
+    name_map = {
+        'ylangylang': 'Ylang Ylang',
+        'benzylalcohol': 'Benzylalcohol',
+        'benzaldehyde': 'Benzaldehyde',
+        '1octen3ol': '1-Octen-3-ol',
+        'roseoil': 'Rose Oil',
+        'lemonoil': 'Lemon Oil',
+        'limonene': 'Limonene',
+        'linalool': 'Linalool',
+        'mineraloil': 'Mineral Oil (Ctrl)'
+    }
+
     fig, ax = plt.subplots(figsize=(10, 10))
     fig.set_facecolor('white')
 
@@ -174,17 +185,112 @@ def Plot_Comparative_EAGS(file, EAGS, SAVEDIR=None):
 
     ax.set_ylabel('Normalized Response', fontsize=25)
     ax.set_xlabel('Time (s)', fontsize=25)
-    ax.set_ylim(-1, .4)
+    ax.set_ylim(-.21, .1)
     plt.xticks(fontsize=14)
     plt.yticks(fontsize=14)
-    plotted_labels = ['Linalool', 'Rose Oil', 'Mineral Oil (Ctrl)']
+    plotted_labels = []
 
+    for n in range(len(EAGS)):
+        text = EAGS[n]  # Replace with your text
 
-    Linalool1k.plot(color=label_color_dict.get('linalool')[0], linewidth=3)
-    YlangYlang1k.plot(color=label_color_dict.get('roseoil')[0], linewidth=3)
-    MineralOil1k.plot(color=label_color_dict.get('mineraloil')[0], linewidth=3)
+        pattern = r'(1k|10k|100)(.*?)(000)'
+
+        match = re.search(pattern, text)
+        odor = match.group(2)
+        print(odor)
+        TRACE = DF[EAGS[n]]
+        plotted_labels.append(name_map.get(odor))
+        TRACE.plot(color=label_color_dict.get(odor)[0], linewidth=3)
 
     ax.legend(plotted_labels, markerscale=1.5, fontsize=20, frameon=False)
+    if SAVEDIR != None:
+        plt.savefig(f'{SAVEDIR}.jpg')
+        plt.savefig(f'{SAVEDIR}.svg')
+    plt.show()
+def Plot_Comparative_EAGS_subplot(file, EAGS, SAVEDIR=None):
+
+
+    #DF = pd.read_csv(file, index_col=0).T
+
+    DF=file
+    # Find_Prospective_Waves(file, 'lemonoil', '100')
+
+    DF = DF.iloc[:-3, :]
+    DF.index = pd.to_numeric(DF.index)
+    DF.index = DF.index.astype(float) / 1000
+    #print(type(DF.index[0]))
+
+    colors = plt.cm.viridis(np.linspace(0, 1, 8))
+
+    label_color_dict = {
+        'limonene': [colors[0], 'o'],
+        'lemonoil': [colors[1], 'o'],
+        'ylangylang': [colors[2], 'o'],
+        'roseoil': [colors[3], 's'],
+        'benzylalcohol': [colors[4], 's'],
+        '1octen3ol': [colors[5], '^'],
+        'benzaldehyde': [colors[6], 'o'],
+        'linalool': [colors[7], '^'],
+        'mineraloil': ['grey', 'P'], }
+
+    name_map = {
+        'ylangylang': 'Ylang Ylang',
+        'benzylalcohol': 'Benzylalcohol',
+        'benzaldehyde': 'Benzaldehyde',
+        '1octen3ol': '1-Octen-3-ol',
+        'roseoil': 'Rose Oil',
+        'lemonoil': 'Lemon Oil',
+        'limonene': 'Limonene',
+        'linalool': 'Linalool',
+        'mineraloil': 'Mineral Oil (Ctrl)'
+    }
+
+    fig, ax = plt.subplots(figsize=(10, 10))
+    fig.set_facecolor('None')
+
+    ax.set_facecolor('None')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
+
+    #ax.set_ylabel('Normalized Response', fontsize=25)
+    #ax.set_xlabel('Time (s)', fontsize=25)
+    #ax.set_ylim(-1, .4)
+    #plt.xticks(fontsize=25)
+    #plt.yticks(fontsize=25)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_xlabel('')
+    ax.set_ylabel('')
+    #ax.set_ylim(-.65,.45)
+    plotted_labels = []
+
+    x_scale_length = 1  # Adjust this based on your X-axis scale
+    y_scale_length = 0.1  # Adjust this based on your Y-axis scale
+    x_bar_length = x_scale_length / 8  # X-axis total span is 8
+    y_bar_length = y_scale_length
+    scale_bar_thickness = 0.005
+    # Draw X scale bar
+    x_bar = patches.Rectangle((0.05, 0), x_bar_length, 0.01,scale_bar_thickness, transform=ax.transAxes, color='black')
+    ax.add_patch(x_bar)
+
+    # Draw Y scale bar
+    y_bar = patches.Rectangle((0.05, 0), 0.01, y_bar_length, scale_bar_thickness, transform=ax.transAxes, color='black')
+    ax.add_patch(y_bar)
+    for n in range(len(EAGS)):
+        text = EAGS[n]  # Replace with your text
+
+        pattern = r'(1k|10k|100)(.*?)(000)'
+
+        match = re.search(pattern, text)
+        odor = match.group(2)
+        print(odor)
+        TRACE = DF[EAGS[n]]
+        plotted_labels.append(name_map.get(odor))
+        TRACE.plot(color=label_color_dict.get(odor)[0], linewidth=5)
+
+    #ax.legend(plotted_labels, markerscale=1.5, fontsize=20, frameon=False)
     if SAVEDIR != None:
         plt.savefig(f'{SAVEDIR}.jpg')
         plt.savefig(f'{SAVEDIR}.svg')
@@ -193,11 +299,33 @@ def Plot_Comparative_EAGS(file, EAGS, SAVEDIR=None):
 
 file = '/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Data/ControlSubtracted/Normalized/BF.1_2_/Dataframes/QualityControlled/_QC_T_1.csv'
 
-EAGS = ['082922m3a11klinalool0000wave2',
-        '082222m1a11kroseoil0000wave2',
-        '080522m1a11kmineraloil0005wave0']
+'''EAGS = ['082322m1a110kroseoil0000wave1',
+        '082322m1a110klemonoil0001wave0',
+        '082522m2a110kylangylang0001wave1']
+        #'080522m1a110kmineraloil0005wave0']'''
 
-Plot_Comparative_EAGS(file=file, EAGS=EAGS, SAVEDIR='/Users/joshswore/PycharmProjects/'
-                                                 'SingleChannelAnalysis/EAG_WAVE_Plots/RoLinMin')
-#Find_Prospective_Waves(CSV=file, Odor='ylangylang', Conc='1k')
+'''EAGS = ['082222m1a11kroseoil0000wave2',
+        '082222m2a11klemonoil0000wave1',
+        '082522m2a11kylangylang0001wave1']
+        #'080522m1a11kmineraloil0005wave0']'''
+
+'''EAGS = ['081822m1a1100roseoil0001wave0',
+        '082222m1a1100lemonoil0001wave1',
+        '081822m1a1100ylangylang0000wave0']
+        #'080522m1a1100mineraloil0005wave0']'''
+
+'''EAGS = ['082922m3a11klinalool0000wave2',
+        '072822m1a11k1octen3ol0001wave2',
+        '072822m1a11kbenzylalcohol0000wave0']'''
+'''EAGS=['090122m2a110klimonene0000wave1',
+      '080522m1a110kmineraloil0005wave0']'''
+
+'''EAGS=['082922m3a11klinalool0000wave2',
+    '082522m2a11kylangylang0001wave1']'''
+
+
+#Plot_Comparative_EAGS_subplot(file=file, EAGS=EAGS, SAVEDIR='/Users/joshswore/PycharmProjects/'
+#                                                 'SingleChannelAnalysis/EAG_WAVE_Plots/YYLoRo-100_inset')
+#Plot_Comparative_EAGS(file=file, EAGS=EAGS, SAVEDIR=None)
+#Find_Prospective_Waves(CSV=file, Odor='benzylalcohol', Conc='1k')
 #EAG_1_Conc_Plot(file, EAGS)

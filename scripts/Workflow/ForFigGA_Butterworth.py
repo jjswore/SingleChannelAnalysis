@@ -1,19 +1,19 @@
-from utils.GA_Butter_Library import *
+from ForFig_GA_Butter_Library import *
 from utils.EAG_Classifier_Library import TT_Split
 from utils.SubSample_Control import Reduce_Ctrl_Samples
 import time
 import os
-from EAG_PCA import EAG_PCA
+from scripts.Data_Processing.EAG_PCA import EAG_PCA
 from utils.Plot_PCA import Plot_2D_PCA
 #==========================================================================================
 #Run the GA
 
-ODORS_L = '1octen3ol|benzylalcohol|linalool'
-ODEABEV_L = ['BolOctLin']
+ODORS_L = 'ylangylang|linalool|mineraloil'
+ODEABEV_L = [ 'YYLinMin']
 DILUTIONS =['1k']
 
 data='/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Data/ControlSubtracted/Normalized/NoFilt/' \
-         'Dataframes/QualityControlled/_QC_T_0.5.csv'
+         'Dataframes/QualityControlled/_QC_T_1.csv'
 
 df = pd.read_csv(data, index_col=0)
 
@@ -30,10 +30,10 @@ for ob, dil in zip(ODEABEV_L, DILUTIONS):
     OdeAbrev = ob
     concentration = dil
     SaveDir=f'/Users/joshswore/PycharmProjects/SingleChannelAnalysis/' \
-            f'Results/ControlSubtracted/{OdeAbrev}/'
+            f'Results/ControlSubtracted/YYLinMin/'
 
     BFSaveDir = f'{SaveDir}/Butterworth_Optimized_Filter/'
-    f'{OdeAbrev}_BestParams.csv'
+    f'YYLinMin_BestParams.csv'
 
     print('checking if Save Directory exists')
     if not os.path.exists(SaveDir):
@@ -50,8 +50,8 @@ for ob, dil in zip(ODEABEV_L, DILUTIONS):
     train_features, test_features, train_labels, test_labels =TT_Split(DF, .20)
     Training_data = pd.concat([train_features, train_labels], axis=1)
     Test_data = pd.concat([test_features, test_labels], axis=1)
-    Training_data.to_csv(f'{BFSaveDir}{OdeAbrev}_trainingDF.csv')
-    Test_data.to_csv(f'{BFSaveDir}{OdeAbrev}_testingDF.csv')
+    Training_data.to_csv(f'{BFSaveDir}YYLinMin_trainingDF.csv')
+    Test_data.to_csv(f'{BFSaveDir}YYLinMin_testingDF.csv')
     # Get the indices of the train_features DataFrame
     train_indices = train_features.index
     # Select the corresponding rows from the LLL_df
@@ -59,7 +59,7 @@ for ob, dil in zip(ODEABEV_L, DILUTIONS):
     # Concatenate train_features and train_labels_df
     df = pd.concat([train_features, train_labels_df], axis=1)
 
-    params, statistics=main(data=df, POPULATION_SIZE=98, TOURNAMENT_SIZE=3, CROSS_PROB=.5, MUT_PROB=.35, Early_Stop=15, G=150)
+    params, statistics=main(data=df, POPULATION_SIZE=9, TOURNAMENT_SIZE=3, CROSS_PROB=.5, MUT_PROB=.35, Early_Stop=15, G=20)
 
     buttered_df = apply_filter_to_dataframe(dataframe=DF.iloc[:, :5001],
                                                 lowcut=params['lowcut'],

@@ -63,13 +63,22 @@ def EAG_PCA(DATA, SAVEDIR, CONC, ODORS, OD):
     return All_DF_PCA_DF, PCA_set
 
 #=========================================================================================================
-"""data='/Users/joshswore/Manduca/Single_Channel_Analysis/DataFrames/Normalized/GA_Butter_Optimized/FDR_Fitness/LLL_finalDF.csv'
-odors = 'lemonoil|limonene|linalool'
-Odenote = 'LLL'
+
+'''from utils.GA_Butter_Library import apply_filter_to_dataframe
+
+data='/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Results/ControlSubtracted/LimMin-smalltrainforBF/Butterworth_Optimized_Filter/LimMin-smalltrainforBF_testingDF.csv'
+odors = 'limonene|mineraloil'
+Odenote = 'LimMin-smalltrainforBF'
 concentration = '1k'
-SaveDir='/Users/joshswore/Manduca/Single_Channel_Analysis/DataFrames/Normalized/GA_Butter_Optimized/FDR_Fitness/'
-EAG_PCA(DATA=data,SAVEDIR=SaveDir,CONC=concentration,ODORS=odors,OD=Odenote)
-"""
+SaveDir='/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Results/ControlSubtracted/LimMin-smalltrainforBF/Butterworth_Optimized_Filter/'
+
+DF = pd.read_csv(data, index_col=0)
+buttered_df = apply_filter_to_dataframe(dataframe=DF.iloc[:, :5001],
+                                                lowcut=1,
+                                                highcut=1.01,
+                                                order=3)
+EAG_PCA(DATA=buttered_df,SAVEDIR=SaveDir,CONC=concentration,ODORS=odors,OD=Odenote)'''
+
 '''concentration = '1k'
 odors = 'linalool|limonene|lemonoil'#|1octen3ol|benzaldehyde|roseoil'#|ylangylang|benzylalcohol'
 odenote = 'LLL'

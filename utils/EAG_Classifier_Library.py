@@ -67,8 +67,8 @@ def RFC_GridSearch(data, concentration, odors):
     data_df = pd.concat(data, axis=1)
     # Split data into train and test sets
     print('Splitting data...')
-    train_features, test_features, train_labels, test_labels = TT_Split(data_df, .75)
-    print(train_labels.shape, train_features.shape, test_labels.shape, train_labels.shape)
+    train_features, test_features, train_labels, test_labels = TT_Split(data_df, .70)
+    print(train_labels.shape, train_features.shape, test_labels.shape, test_features.shape)
 
     n_estimators = [10]
     max_features = ["sqrt", "log2"]
@@ -140,6 +140,7 @@ def RF_Testing(data, concentration, odors, classifier, P):
     # Split the data into training and testing sets
     print('splitting data')
     train_features, test_features, train_labels, test_labels = TT_Split(data_df, .7)
+
     print(classifier.get_params(deep=True))
     params = classifier.get_params()
     params['n_estimators'] = 1000
@@ -196,7 +197,7 @@ def SVM_GridSearch(data, concentration, odors):
     # Split data into train and test sets
     print('Splitting data...')
     train_features, test_features, train_labels, test_labels = TT_Split(data_df, .75)
-    print(train_labels, train_features)
+    print(train_labels.shape, train_features.shape, test_labels.shape, test_features.shape)
 
     # Set hyperparameters to search over
     kernel = ['rbf']
@@ -269,10 +270,12 @@ def SVM_Testing(data, concentration, odors, classifier, P):
     title=concentration
     data_df=Analysis_data[Analysis_data['concentration'].str.contains(title)]
     data_df=data_df[data_df['label'].str.contains(odors)]
+    global train_labels
+    global test_labels
 
     # Split the dataset into training and testing sets
     print('Splitting data...')
-    train_features, test_features, train_labels, test_labels = TT_Split(data_df, .75)
+    train_features, test_features, train_labels, test_labels = TT_Split(data_df, .70)
 
     # Train the classifier
     print('Training model...')

@@ -1,0 +1,225 @@
+from deap import base, creator, tools
+from utils.EAG_Classifier_Library import PCA_Constructor
+from utils.EAG_DataProcessing_Library import butter_bandpass_filter
+import random
+import pandas as pd
+from scripts.Data_Processing.EAG_PCA import EAG_PCA
+from utils.Plot_PCA import Plot_2D_PCA_Simple
+import numpy as np
+
+
+def create_individual():
+    #print('creating individual')
+    return {
+        'lowcut': random.uniform(.00001, 1),
+        'highcut': random.uniform(1.001, 6),
+        'order': random.randint(1, 4)}
+
+def apply_filter_to_dataframe(dataframe, lowcut, highcut, fs=1000, order=1):
+    #print('applying filter to dataframe')
+    # creates a new DataFrame with the same structure as the input DataFrame
+    filtered_dataframe = pd.DataFrame(columns=dataframe.columns, index=dataframe.index)
+
+    # iterates over the rows of the input DataFrame
+    for index, row in dataframe.iterrows():
+        # applies the butterworth bandpass filter to the current row
+        filtered_row = butter_bandpass_filter(row, lowcut, highcut, fs, order)
+
+        # stores the filtered row in the new DataFrame
+        filtered_dataframe.loc[index] = filtered_row
+
+    return filtered_dataframe
+
+def GA_EVAL_FDR_MultiClass(individual, data,_scaling_memory=[None]):
+    buttered_df = apply_filter_to_dataframe(dataframe=data.iloc[:5000, :-3],
+                                            lowcut=individual['lowcut'],
+                                            highcut=individual['highcut'],
+                                            order=individual['order'])
+    buttered_df = pd.concat([buttered_df, data.iloc[:, -3:]], axis=1)
+
+    pca_df, _, _ = PCA_Constructor(buttered_df.iloc[:, :-3], 2)
+    PCA_DF = pd.concat([pca_df, buttered_df.iloc[:, -3:]], axis=1)
+    IND_ID= hash(str(individual))
+    F_Name = f'/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Results/' \
+             f'ControlSubtracted/YYLinMin/PCA/figures/GABF_PCAs/{IND_ID}_PCA.svg'
+
+    Plot_2D_PCA_Simple(PCA_DF, SaveDir=F_Name)
+
+    # Calculate the overall mean of the data
+    overall_mean = PCA_DF.iloc[:, :-3].mean()
+
+    # Calculate the within-class scatter matrix
+    S_W = sum([PCA_DF[PCA_DF['label'] == label].iloc[:, :-3].cov() * len(PCA_DF[PCA_DF['label'] == label])
+               for label in PCA_DF['label'].unique()])
+
+    # Calculate the between-class scatter matrix
+    class_means = PCA_DF.groupby('label').mean()
+    S_B = sum([(mean - overall_mean).values.reshape(-1, 1).dot((mean - overall_mean).values.reshape(1, -1)) * len(
+        PCA_DF[PCA_DF['label'] == label])
+               for label, mean in class_means.iterrows()])
+
+    # Calculate Fisher's Discriminant Ratio for multiple classes
+    FDR = np.linalg.det(S_B) / np.linalg.det(S_W)
+
+    # If the scaling factor isn't already computed, calculate and store it
+    if _scaling_memory[0] is None:
+        _scaling_memory[0] = 10 ** (-np.floor(np.log10(np.abs(FDR))))
+    # Use the stored scaling factor to scale the FDR
+    FDR_scaled = FDR * _scaling_memory[0]
+
+    return FDR_scaled,
+
+def dict_mutate(individual, mu, sigma, indpb):
+    for key in individual:
+        if random.random() < indpb:
+            gauss_val = random.gauss(mu,sigma)
+            #print('\n')
+            #print('key:', key)
+           # print('gauss va:', gauss_val)
+            #print('individual before mutation', individual)
+            individual[key] += gauss_val
+            individual['lowcut'] = max(.00001, min(1., individual['lowcut']))
+            individual['highcut'] = max(1.01, min(6., individual['highcut']))
+            individual['order'] = int(round(max(1, min(4, individual['order']))))
+            #print('after mutation', individual)
+            #print('\n' )
+    return individual,
+
+def dict_mate(ind1, ind2, eta, indpb):
+    ol = [o1, o2] = ind1.copy(), ind2.copy()
+    for key in ind1:
+        x1, x2 = o1[key], o2[key]
+        rand = random.random()
+        if rand <= indpb:
+            beta = 2. * rand
+        else:
+            beta = 1. / (2. * (1. - rand))
+        beta **= 1. / (eta + 1.)
+        o1[key] = 0.5 * (((1 + beta) * x1) + ((1 - beta) * x2))
+        o2[key] = 0.5 * (((1 - beta) * x1) + ((1 + beta) * x2))
+        for o in ol:
+            o['lowcut'] = max(.00001, min(1, o['lowcut']))
+            o['highcut'] = max(1.01, min(6, o['highcut']))
+            o['order'] = int(round(max(1, min(4, o['order']))))
+    return o1, o2
+
+def main(data, POPULATION_SIZE, TOURNAMENT_SIZE, CROSS_PROB, MUT_PROB, Early_Stop, G):
+    # Register the custom initialization function in the toolbox
+    print('initializing.....')
+    creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+    creator.create("Individual", dict, fitness=creator.FitnessMax)
+    toolbox = base.Toolbox()
+    toolbox.register("individual", tools.initIterate, creator.Individual, create_individual)
+    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+    toolbox.register("evaluate", GA_EVAL_FDR_MultiClass)
+    toolbox.register("mate", dict_mate, eta=20.0, indpb=CROSS_PROB)
+    toolbox.register("mutate", dict_mutate, mu=0, sigma=1, indpb=MUT_PROB)
+    toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
+    hof = tools.HallOfFame(1)
+    print('populating.....')
+    hardcoded_individual = creator.Individual({'lowcut': 0.02387528523404051, 'highcut': 6, 'order': 1})
+    hardcoded_individual2 = creator.Individual({'lowcut': 1.0, 'highcut': 3, 'order': 2})
+
+    population = toolbox.population(n=POPULATION_SIZE)
+    population.append(hardcoded_individual)
+    population.append(hardcoded_individual2)
+    # perform evaluation of each individual in the population
+    print('initial evaluation of the population')
+    fitnesses = list(map(toolbox.evaluate, population, [data] * len(population)))
+    #print(f'these are the fits: {fitnesses}')
+    #print('initial evaluation of the population')
+    #with concurrent.futures.ThreadPoolExecutor() as executor:
+        #fitnesses = list(executor.map(lambda ind_data: toolbox.evaluate(*ind_data), zip(population, [data] * len(population))))
+
+    for ind, fit in zip(population, fitnesses):
+        ind.fitness.values = fit
+
+    # get all the fitnesses in the population
+    fits = [ind.fitness.values[0] for ind in population]
+    EvolutionStats = {'Generation': [], 'Population': [], 'Mean Fitness': [], 'Max Fitness': [], 'Min Fitness': [],
+                      'Fitness STD': []}
+    # perform the evolution for G generations (G is set as an argument for the main function)
+
+    g = 0
+    max_fitnesses = []
+    no_improvement = 0
+    MAX_NO_IMPROVEMENT = Early_Stop  # change this to the number of generations without improvement you want to tolerate
+    while g < G:
+        max_fitness = round(max(fits), 5)
+        #if max_fitnesses and max_fitness <= max(max_fitnesses):
+            #no_improvement += 1
+        #else:
+            #no_improvement = 0
+        max_fitnesses.append(max_fitness)
+
+    # print generation number
+        g = g + 1
+        #print(f' Generation: {g}')
+        # select offspring from the population via the tournament. individuals with best accuracy
+        # proceed to the offspring and next generation
+        offspring = toolbox.select(population, len(population))
+        offspring = list(map(toolbox.clone, offspring))
+
+        # Apply crossover and mutation on the offspring
+        #print('mating')
+        for child1, child2 in zip(offspring[::2], offspring[1::2]):
+            if random.random() < CROSS_PROB:
+                toolbox.mate(child1, child2)
+                del child1.fitness.values
+                del child2.fitness.values
+
+        #print('mutating')
+        for mutant in offspring:
+            if random.random() < MUT_PROB:
+                toolbox.mutate(mutant)
+                del mutant.fitness.values
+        # mutated and crossed over individuals will not have a fitness and need to be evaluated
+        # only evaluated individuals that need evaluting and dont have a fitness (accuracy score)
+        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+
+        fitnesses = list(map(toolbox.evaluate, invalid_ind, [data] * len(invalid_ind)))
+
+        for ind, fit in zip(invalid_ind, fitnesses):
+            ind.fitness.values = fit
+
+        population[:] = offspring
+
+        #for individual in population:
+        #    print(f'Individual: {individual}, Fitness: {individual.fitness.values[0]}')
+
+
+        hof.update(population)
+        if g > 1:
+            if previous_parameters == hof[0]:
+                no_improvement += 1
+                previous_parameters = hof[0]
+            else:
+                no_improvement = 0
+                previous_parameters = hof[0]
+        else:
+            previous_parameters = hof[0]
+
+        if no_improvement >= MAX_NO_IMPROVEMENT:
+            print(f"Stopping early: Maximum fitness hasn't improved for {MAX_NO_IMPROVEMENT} generations.")
+            break
+
+        fits = [ind.fitness.values[0] for ind in population]
+        #calculate some statistics about the population
+        length = len(population)
+        mean = sum(fits) / length
+        sum2 = sum(x * x for x in fits)
+        std = abs(sum2 / length - mean ** 2) ** 0.5
+        print(f'----------GENERATION {g}----------')
+        print(f'_Population Size_  _Mean Fitness_  _Max Fitness_  _Min Fitness_ _Fitness STD_')
+        print(f'     {length}         {mean}    {max(fits)}    {min(fits)}     {std}')
+        # Inside the loop for each generation:
+        EvolutionStats['Generation'].append(g)
+        EvolutionStats['Population'].append(length)
+        EvolutionStats['Mean Fitness'].append(mean)
+        EvolutionStats['Max Fitness'].append(max(fits))
+        EvolutionStats['Min Fitness'].append(min(fits))
+        EvolutionStats['Fitness STD'].append(std)
+        print(f'best parameters found: {hof[0]}')
+    print(f'best parameters found: {hof[0]}')
+
+    return hof[0], EvolutionStats

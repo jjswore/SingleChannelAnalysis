@@ -44,6 +44,21 @@ def ClassifierResults(BASE, BUTTER, PROCESS,CH, QCTHRESH,Feature, MODEL):
     df=pickle_to_DF(f'{BASE}Butter{BUTTER}/{PROCESS}/{CH}/ClassifierResults/{Feature}/_QC_T_{QCTHRESH}/{MODEL}_Results.pickle')
     return df
 
+def rearrange_for_ctrl(CM, labels):
+    CM = CM.copy()
+
+    ctrl_index = labels.index('CTRL')
+    middle_index = len(labels) // 2
+
+    if ctrl_index != middle_index:
+        # Swap 'CTRL' label position with middle label
+        labels[ctrl_index], labels[middle_index] = labels[middle_index], labels[ctrl_index]
+
+        # Swap corresponding rows and columns in the confusion matrix
+        CM[[ctrl_index, middle_index], :] = CM[[middle_index, ctrl_index], :]
+        CM[:, [ctrl_index, middle_index]] = CM[:, [middle_index, ctrl_index]]
+
+    return CM, labels
 def extract_CM(DF, cumulative=False, ACC=True):
     if cumulative == True:
         sumCM=DF['confusion_matrix'].sum()
@@ -54,11 +69,14 @@ def extract_CM(DF, cumulative=False, ACC=True):
 
         return normalized_CM
 #
-def plot_CM(CM,LABELS,TITLE, YROT=0, XROT=90, SAVEDIR=None):
+def plot_CM(CM,LABELS,TITLE, YROT=0, XROT=90, REARRANGE = False, SAVEDIR=None):
+    if REARRANGE == True:
+        CM, LABELS = rearrange_for_ctrl(CM, LABELS)
+
     fig, ax = plt.subplots(figsize=(10, 10))
 
     disp=ConfusionMatrixDisplay(CM,display_labels=LABELS)
-    CMDISP=disp.plot(cmap=plt.cm.Blues,ax=ax)
+    CMDISP=disp.plot(cmap=plt.cm.viridis,ax=ax)
 
     for labels in disp.text_:
         for label in labels:
@@ -66,8 +84,8 @@ def plot_CM(CM,LABELS,TITLE, YROT=0, XROT=90, SAVEDIR=None):
 
     ax.set_xticks(np.arange(len(LABELS)))
     ax.set_yticks(np.arange(len(LABELS)))
-    ax.set_xticklabels(LABELS, fontsize=24, rotation=XROT)
-    ax.set_yticklabels(LABELS, fontsize=24, rotation=YROT)
+    ax.set_xticklabels(LABELS, fontsize=20, rotation=XROT)
+    ax.set_yticklabels(LABELS, fontsize=20, rotation=YROT)
     plt.ylabel('$\it{True}$', fontsize=20)
     plt.xlabel('$\it{Predicted}$', fontsize=20)
 
@@ -93,6 +111,7 @@ def plot_CM(CM,LABELS,TITLE, YROT=0, XROT=90, SAVEDIR=None):
 def ViPlot(DATA, TITLE, N_Odors, INNER='box', DisplayMean=True, SAVEDIR=None):
     plt.figure(figsize=(18, 9))
     plt.xticks(None)
+    plt.gca().set(xticklabels=[])
     plt.yticks(fontsize=14, weight='bold')
     #plt.xlabel('Dataset', fontsize=20, weight='bold')
     plt.ylabel('Accuracy', fontsize=20, weight='bold')
@@ -103,7 +122,7 @@ def ViPlot(DATA, TITLE, N_Odors, INNER='box', DisplayMean=True, SAVEDIR=None):
     plt.gca().spines['right'].set_visible(False)
 
     # Create the violin plot
-    ax = sns.violinplot(data=DATA, color="skyblue", linewidth=5, inner=INNER)
+    ax = sns.violinplot(data=DATA, color="thistle", alpha = .5, linewidth=5, inner=INNER)
     if INNER != 'box':
         sns.swarmplot(data=DATA, color="steelblue", size=8)
 
