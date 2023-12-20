@@ -1,7 +1,7 @@
 from utils.Classifier_Results_Library import *
 from Config.Config import ControlSUB_ResultsDir
 #
-ODEABEV_L = ['YYLoRoMin-10k']
+ODEABEV_L = ['RoLoYYMin']
 
 for o in ODEABEV_L:
     File_Dir=f'{ControlSUB_ResultsDir}/{o}/ClassifierResults/'
