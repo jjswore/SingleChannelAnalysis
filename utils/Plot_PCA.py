@@ -245,7 +245,7 @@ def Plot_2D_PCA(DATADIR, OA, ODORS, CONC, TITLE, SAVE=True):
 
     if SAVE == True:
         plt.savefig(f'{SaveDir}{OderAbreve}_PCA.jpg')
-        plt.savefig(f'{SaveDir}{OderAbreve}_PCA.svg')
+        plt.savefig(f'{SaveDir}{OderAbreve}_PCA.svg',transparent=True)
     plt.show()
 
 

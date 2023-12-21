@@ -203,10 +203,10 @@ def Plot_Comparative_EAGS(file, EAGS, SAVEDIR=None):
         plotted_labels.append(name_map.get(odor))
         TRACE.plot(color=label_color_dict.get(odor)[0], linewidth=3)
 
-    ax.legend(plotted_labels, markerscale=1.5, fontsize=20, frameon=False)
+    #ax.legend(plotted_labels, markerscale=1.5, fontsize=20, frameon=False)
     if SAVEDIR != None:
         plt.savefig(f'{SAVEDIR}.jpg')
-        plt.savefig(f'{SAVEDIR}.svg')
+        plt.savefig(f'{SAVEDIR}.svg', transparent=True)
     plt.show()
 def Plot_Comparative_EAGS_subplot(file, EAGS, SAVEDIR=None):
 
@@ -305,10 +305,10 @@ file = '/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Data/ControlSubtr
         '082522m2a110kylangylang0001wave1']
         #'080522m1a110kmineraloil0005wave0']'''
 
-'''EAGS = ['082222m1a11kroseoil0000wave2',
+EAGS = ['082222m1a11kroseoil0000wave2',
         '082222m2a11klemonoil0000wave1',
         '082522m2a11kylangylang0001wave1']
-        #'080522m1a11kmineraloil0005wave0']'''
+        #'080522m1a11kmineraloil0005wave0']
 
 '''EAGS = ['081822m1a1100roseoil0001wave0',
         '082222m1a1100lemonoil0001wave1',
@@ -321,15 +321,15 @@ file = '/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Data/ControlSubtr
 '''EAGS=['090122m2a110klimonene0000wave1',
       '080522m1a110kmineraloil0005wave0']'''
 
-EAGS=['082922m3a11klinalool0000wave2',
+'''EAGS=['082922m3a11klinalool0000wave2',
     '082522m2a11kylangylang0001wave1',
-    '072822m1a11kbenzylalcohol0000wave0']
+    '072822m1a11kbenzylalcohol0000wave0']'''
 
 #EAGS=['072822m1a11kbenzylalcohol0000wave0']
 
 
 Plot_Comparative_EAGS(file=file, EAGS=EAGS, SAVEDIR='/Users/joshswore/PycharmProjects/'
-                                                            'SingleChannelAnalysis/EAG_WAVE_Plots/YYBolLin')
+                                                            'SingleChannelAnalysis/EAG_WAVE_Plots/YYLoRo')
 #Plot_Comparative_EAGS(file=file, EAGS=EAGS, SAVEDIR=None)
 #Find_Prospective_Waves(CSV=file, Odor='benzylalcohol', Conc='1k')
 #EAG_1_Conc_Plot(file, EAGS)

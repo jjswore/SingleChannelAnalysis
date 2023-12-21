@@ -4,7 +4,7 @@ import pandas as pd
 #OdAbrev='YYRoLinMin'
 
 
-ODEABEV_L = ['YYLoRoMin-100']
+ODEABEV_L = ['YYLoRoMin-1k10k100']
 #DILUTIONS =['1k','1k|10k','1k|100','1k|10k|100']
 
 

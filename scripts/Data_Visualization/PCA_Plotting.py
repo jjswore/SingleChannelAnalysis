@@ -1,13 +1,12 @@
 from utils.Plot_PCA import *
 from Config.Config import ControlSUB_ResultsDir
 
-OdeAbreve = 'LemLinMin-1k10k'
-odors = 'mineraloil|lemonoil|limonene'
+OdeAbreve = 'RoLoYYMin'
+odors = 'ylangylang|roseoil|lemonoil'
 
 
-data=f'{ControlSUB_ResultsDir}{OdeAbreve}/PCA/'
+data=f'{ControlSUB_ResultsDir}/{OdeAbreve}/PCA/'
 concentration = '1k'
-SaveDir=f'/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Results/ControlSubtracted/' \
-        f'{OdeAbreve}/PCA/'
+SaveDir=f'/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Results/ControlSubtracted/{OdeAbreve}/PCA/'
 
 Plot_2D_PCA(DATADIR=data,OA=OdeAbreve,CONC=concentration,ODORS=odors,TITLE='', SAVE=True)

@@ -55,21 +55,21 @@ def extract_CM(DF, cumulative=False, ACC=True):
         return normalized_CM
 #
 def plot_CM(CM,LABELS,TITLE, YROT=0, XROT=90, SAVEDIR=None):
-    fig, ax = plt.subplots(figsize=(10, 10))
+    fig, ax = plt.subplots(figsize=(8, 8))
 
     disp=ConfusionMatrixDisplay(CM,display_labels=LABELS)
-    CMDISP=disp.plot(cmap=plt.cm.Blues,ax=ax)
+    CMDISP=disp.plot(cmap=plt.cm.Oranges,ax=ax)
 
     for labels in disp.text_:
         for label in labels:
-            label.set_fontsize(20)
+            label.set_fontsize(24)
 
     ax.set_xticks(np.arange(len(LABELS)))
     ax.set_yticks(np.arange(len(LABELS)))
     ax.set_xticklabels(LABELS, fontsize=24, rotation=XROT)
     ax.set_yticklabels(LABELS, fontsize=24, rotation=YROT)
-    plt.ylabel('$\it{True}$', fontsize=20)
-    plt.xlabel('$\it{Predicted}$', fontsize=20)
+    plt.ylabel('$\it{True}$', fontsize=24)
+    plt.xlabel('$\it{Predicted}$', fontsize=24)
 
     cbar = ax.images[-1].colorbar
     cbar.mappable.set_clim(0, 1)
@@ -83,7 +83,7 @@ def plot_CM(CM,LABELS,TITLE, YROT=0, XROT=90, SAVEDIR=None):
 
         print('Saving Fig...')
         plt.savefig(os.path.join(f'{SAVEDIR}Confusion_Matrix.jpg'))
-        plt.savefig(os.path.join(f'{SAVEDIR}Confusion_Matrix.svg'))
+        plt.savefig(os.path.join(f'{SAVEDIR}Confusion_Matrix.svg'), transparent=True)
 
     else:
         print('Figure is not saved')
@@ -91,19 +91,19 @@ def plot_CM(CM,LABELS,TITLE, YROT=0, XROT=90, SAVEDIR=None):
     return CMDISP
 
 def ViPlot(DATA, TITLE, N_Odors, INNER='box', DisplayMean=True, SAVEDIR=None):
-    plt.figure(figsize=(18, 9))
-    plt.xticks(None)
-    plt.yticks(fontsize=14, weight='bold')
+    plt.figure(figsize=(10, 7))
+    plt.xticks()
+    plt.yticks(fontsize=24, weight='bold')
     #plt.xlabel('Dataset', fontsize=20, weight='bold')
-    plt.ylabel('Accuracy', fontsize=20, weight='bold')
-    plt.title(TITLE, fontsize=20)
+    plt.ylabel('Accuracy', fontsize=24, weight='bold')
+    #plt.title(TITLE, fontsize=24)
     plt.ylim(0, 1)
     plt.axhline(y=(1 / N_Odors), linestyle='--', color='black')
     plt.gca().spines['top'].set_visible(False)
     plt.gca().spines['right'].set_visible(False)
 
     # Create the violin plot
-    ax = sns.violinplot(data=DATA, color="skyblue", linewidth=5, inner=INNER)
+    ax = sns.violinplot(data=DATA, color="lightsalmon", linewidth=5, inner=INNER)
     if INNER != 'box':
         sns.swarmplot(data=DATA, color="steelblue", size=8)
 
@@ -118,15 +118,17 @@ def ViPlot(DATA, TITLE, N_Odors, INNER='box', DisplayMean=True, SAVEDIR=None):
 
     plt.ylim(0, 1.1)
     plt.tight_layout()
+    ax = plt.gca()  # Get current axes
+    ax.set_xticklabels([''] * len(ax.get_xticks()))
     if SAVEDIR is not None:
         print('Saving Fig...')
         plt.savefig(f'{SAVEDIR}ViPlot.jpg')
-        plt.savefig(f'{SAVEDIR}ViPlot.svg')
+        plt.savefig(f'{SAVEDIR}ViPlot.svg', transparent=True)
     plt.show()
 
 
 def BoxPlot(DATA, TITLE, N_Odors, SAVEDIR=None):
-    plt.figure(figsize=(18, 9))
+    plt.figure(figsize=(10, 5))
     plt.xticks(rotation=0, fontsize=12, weight='bold')
     plt.yticks(fontsize=14, weight='bold')
     #plt.xlabel('Dataset', fontsize=20, weight='bold')
