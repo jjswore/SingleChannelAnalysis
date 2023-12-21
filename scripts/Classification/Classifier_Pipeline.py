@@ -4,7 +4,7 @@ import pandas as pd
 #OdAbrev='YYRoLinMin'
 
 
-ODEABEV_L = ['BolOctLin']
+ODEABEV_L = ['YYLoRoMin-1k10k100']
 #ODOR_L = ['limonene|linalool|1octen3ol|benzylalcohol']
 #DILUTIONS =['1k','1k|10k','1k|100','1k|10k|100']
 
@@ -34,7 +34,7 @@ for OdAbrev in ODEABEV_L:
 
     ODOR_L = Test_DF['label'].unique() #'linalool|lemonoil|mineraloil'
     CONC_L = Test_DF['concentration'].unique()
-    #ODOR_L = [odor for odor in ODOR_L if odor != 'mineraloil']
+    ODOR_L = [odor for odor in ODOR_L if odor != 'mineraloil']
     Odors = '|'.join(ODOR_L)
     #Concs = '|'.join(CONC_L)
     Concs = '1k'
@@ -45,9 +45,9 @@ for OdAbrev in ODEABEV_L:
     #data to input can be time series data or PCs Usin PC's we can expect training to occur faster since there are fewer "features"
 
     print(f'beginning SVM...')
-    SVM_Results=SVMmodel(concentrations=Concs, data=[Test_DF], odor=Odors,PosL='1octen3ol', repeats=100)
+    SVM_Results=SVMmodel(concentrations=Concs, data=[Test_DF], odor=Odors,PosL='lemonoil', repeats=100)
     pickle_Saver(savedir=Save_Directory,ext='SVM_Results',data=SVM_Results)
 
     print(f'beginning Random Forest')
-    RF_results=RFmodel(concentrations=Concs,data=[Test_PCA_DF],odor=Odors,PosL='1octen3ol', repeats=100)
+    RF_results=RFmodel(concentrations=Concs,data=[Test_PCA_DF],odor=Odors,PosL='lemonoil', repeats=100)
     pickle_Saver(savedir=Save_Directory,ext='RF_Results',data=RF_results)
