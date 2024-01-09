@@ -305,10 +305,10 @@ file = '/Users/joshswore/PycharmProjects/SingleChannelAnalysis/Data/ControlSubtr
         '082522m2a110kylangylang0001wave1']
         #'080522m1a110kmineraloil0005wave0']'''
 
-EAGS = ['082222m1a11kroseoil0000wave2',
+'''EAGS = ['082222m1a11kroseoil0000wave2',
         '082222m2a11klemonoil0000wave1',
         '082522m2a11kylangylang0001wave1']
-        #'080522m1a11kmineraloil0005wave0']
+        #'080522m1a11kmineraloil0005wave0']'''
 
 '''EAGS = ['081822m1a1100roseoil0001wave0',
         '082222m1a1100lemonoil0001wave1',
@@ -325,11 +325,18 @@ EAGS = ['082222m1a11kroseoil0000wave2',
     '082522m2a11kylangylang0001wave1',
     '072822m1a11kbenzylalcohol0000wave0']'''
 
-#EAGS=['072822m1a11kbenzylalcohol0000wave0']
+'''EAGS=['082922m3a11klinalool0000wave2',
+      '082222m2a11klemonoil0000wave1',
+      '090122m2a11klimonene0000wave1',
+      '080522m1a1100mineraloil0005wave0']'''
+
+'''EAGS=['082922m3a11klinalool0000wave2',
+      '082222m1a11kroseoil0000wave2',
+      '080522m1a1100mineraloil0005wave0']'''
 
 
 Plot_Comparative_EAGS(file=file, EAGS=EAGS, SAVEDIR='/Users/joshswore/PycharmProjects/'
-                                                            'SingleChannelAnalysis/EAG_WAVE_Plots/YYLoRo')
+                                                            'SingleChannelAnalysis/EAG_WAVE_Plots/RoLoMin1k')
 #Plot_Comparative_EAGS(file=file, EAGS=EAGS, SAVEDIR=None)
 #Find_Prospective_Waves(CSV=file, Odor='benzylalcohol', Conc='1k')
 #EAG_1_Conc_Plot(file, EAGS)

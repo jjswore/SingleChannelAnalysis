@@ -30,6 +30,8 @@ def main():
 
 
 
+
+
     print('building plots')
     for x, label in zip(enumerate(raw['label'].unique()), enumerate(norm['label'].unique())):
         axes[x[0], 0].set_ylabel(label[1], weight='bold', size=18)

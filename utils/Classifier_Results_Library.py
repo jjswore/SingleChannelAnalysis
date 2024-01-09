@@ -39,10 +39,6 @@ def pickle_to_DF(FILE):
             dd[key].append(value)
     return pd.DataFrame.from_dict(dd)
 
-def ClassifierResults(BASE, BUTTER, PROCESS,CH, QCTHRESH,Feature, MODEL):
-
-    df=pickle_to_DF(f'{BASE}Butter{BUTTER}/{PROCESS}/{CH}/ClassifierResults/{Feature}/_QC_T_{QCTHRESH}/{MODEL}_Results.pickle')
-    return df
 
 def extract_CM(DF, cumulative=False, ACC=True):
     if cumulative == True:
@@ -58,7 +54,7 @@ def plot_CM(CM,LABELS,TITLE, YROT=0, XROT=90, SAVEDIR=None):
     fig, ax = plt.subplots(figsize=(8, 8))
 
     disp=ConfusionMatrixDisplay(CM,display_labels=LABELS)
-    CMDISP=disp.plot(cmap=plt.cm.Oranges,ax=ax)
+    CMDISP=disp.plot(cmap=plt.cm.Blues,ax=ax)
 
     for labels in disp.text_:
         for label in labels:
@@ -68,8 +64,8 @@ def plot_CM(CM,LABELS,TITLE, YROT=0, XROT=90, SAVEDIR=None):
     ax.set_yticks(np.arange(len(LABELS)))
     ax.set_xticklabels(LABELS, fontsize=24, rotation=XROT)
     ax.set_yticklabels(LABELS, fontsize=24, rotation=YROT)
-    plt.ylabel('$\it{True}$', fontsize=24)
-    plt.xlabel('$\it{Predicted}$', fontsize=24)
+    plt.ylabel('True', fontsize=24, weight='bold')
+    plt.xlabel('Predicted', fontsize=24, weight='bold')
 
     cbar = ax.images[-1].colorbar
     cbar.mappable.set_clim(0, 1)
@@ -91,7 +87,7 @@ def plot_CM(CM,LABELS,TITLE, YROT=0, XROT=90, SAVEDIR=None):
     return CMDISP
 
 def ViPlot(DATA, TITLE, N_Odors, INNER='box', DisplayMean=True, SAVEDIR=None):
-    plt.figure(figsize=(10, 7))
+    plt.figure(figsize=(14, 7))
     plt.xticks()
     plt.yticks(fontsize=24, weight='bold')
     #plt.xlabel('Dataset', fontsize=20, weight='bold')
@@ -103,7 +99,7 @@ def ViPlot(DATA, TITLE, N_Odors, INNER='box', DisplayMean=True, SAVEDIR=None):
     plt.gca().spines['right'].set_visible(False)
 
     # Create the violin plot
-    ax = sns.violinplot(data=DATA, color="lightsalmon", linewidth=5, inner=INNER)
+    ax = sns.violinplot(data=DATA, color="skyblue", linewidth=5, inner=INNER)
     if INNER != 'box':
         sns.swarmplot(data=DATA, color="steelblue", size=8)
 
